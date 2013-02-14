@@ -29,7 +29,7 @@ kTestRadioCmd   = 0
 kTestGyroCmd    = 1
 kTestAccelCmd   = 2
 kTestDFlashCmd  = 3
-kTestMotorCmd   = 4
+kTestMotorCmd   = 0x80
 kTestSMACmd     = 5
 kTestMPUCmd     = 6
 
@@ -131,6 +131,18 @@ class TestSuite():
                 time.sleep(0.2)
                 self.print_packet(self.last_packet)
             time.sleep(1)
+
+    def test_motorop(self):
+        '''
+        Description:
+            Test motors open loop
+        '''
+        header = chr(kStatusUnused) + chr(kTestMotorCmd)
+        thrust = [500, 500, 2000]
+        data_out = header + ''.join(pack("3h",*thrust))
+        if(self.check_conn()):
+            self.radio.tx(dest_addr=self.dest_addr, data=data_out)
+            time.sleep(0.2)
 
     def test_gyro(self, num_test_packets):
         '''

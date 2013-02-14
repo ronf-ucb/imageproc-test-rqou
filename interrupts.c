@@ -14,6 +14,8 @@
 #include "radio.h"
 #include <stdlib.h>
 #include "led.h"
+#include "utils.h"
+#include "cmd.h"
 
 unsigned char* rxPacketData;
 unsigned char type, status, length;
@@ -27,14 +29,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
     _INT0IF = 0;    // Clear the interrupt flag
 }
 
-void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
-
-    _T1IF = 0;
-}
-
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
     MacPacket rx_packet;
-    Payload rx_payload;
 
     if (!radioRxQueueEmpty())
     {
@@ -42,48 +38,9 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
         rx_packet = radioDequeueRxPacket();
         if(rx_packet == NULL) return;
 
-        // Retrieve payload
-        rx_payload = macGetPayload(rx_packet);
-
-        // Switch on packet type
-        Test* test = (Test*) malloc(sizeof(Test));
-        if(!test) return;
-
-        test->packet = rx_packet;
-        switch(payGetType(rx_payload))
-        {
-            case RADIO_TEST:
-                test->tf = &test_radio;
-                queuePush(fun_queue, test);
-                break;
-            case GYRO_TEST:
-                test->tf = &test_gyro;
-                queuePush(fun_queue, test);
-                break;
-            case ACCEL_TEST:
-                test->tf = &test_accel;
-                queuePush(fun_queue, test);
-                break;
-            case DFLASH_TEST:
-                test->tf = &test_dflash;
-                queuePush(fun_queue, test);
-                break;
-            case MOTOR_TEST:
-                test->tf = &test_motor;
-                queuePush(fun_queue, test);
-                break;
-            case SMA_TEST:
-                test->tf = &test_sma;
-                queuePush(fun_queue, test);
-                break;
-            case MPU_TEST:
-                test->tf = &test_mpu;
-                queuePush(fun_queue, test);
-                break;
-            default:
-                break;
-        }
+        cmdPushFunc(rx_packet);   
     }
+
     _T2IF = 0;
 }
 

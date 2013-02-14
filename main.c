@@ -30,6 +30,7 @@
 #include "sclock.h"
 #include "spi_controller.h"
 #include "interrupts.h"
+#include "cmd.h"
 #include <stdlib.h>
 
 Payload rx_payload;
@@ -56,6 +57,7 @@ int main() {
     //xlSetup();
     dfmemSetup(0);
     mpuSetup(1);
+    cmdSetup();
 
     // Radio setup
     radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
@@ -83,7 +85,7 @@ int main() {
             rx_payload = macGetPayload(test->packet);
             tf = test->tf;
             (*tf)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload));
-            payDelete(rx_payload);
+            payDelete(rx_payload);      //Ron's code doesn't do this
             radioReturnPacket(test->packet);
             free(test);
         }

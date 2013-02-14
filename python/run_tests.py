@@ -44,10 +44,10 @@ import test_suite
 
 #RADIO_DEV_NAME  = '/dev/tty.usbserial-*' or 'COMx'
 #RADIO_DEV_NAME = 'COM1'
-RADIO_DEV_NAME = '/dev/ttyUSB0'
-BS_BAUDRATE = 57600
+RADIO_DEV_NAME = 'COM9'
+BS_BAUDRATE = 230400
 
-DEST_ADDR = '\x21\x12'
+DEST_ADDR = '\x21\x02'
 
 if __name__ == '__main__':
     try:
@@ -64,8 +64,8 @@ if __name__ == '__main__':
             print('\nI: Testing radio communication:')
             ts.test_radio()
 
-            print('\nI: Testing flash memory:\n')
-            ts.test_dflash()
+            print('\nI: Testing motors:\n')
+            ts.test_motorop()
 
             print('\nI: Testing MPU6000:\n')
             ts.test_mpu()

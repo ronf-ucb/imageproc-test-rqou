@@ -22,6 +22,7 @@
 #include "utils.h"
 #include "queue.h"
 #include "radio.h"
+#include "tih.h"
 #include "radio_settings.h"
 #include "tests.h" // TODO (fgb) : define/includes need to live elsewhere
 #include "dfmem.h"
@@ -57,6 +58,7 @@ int main() {
     //xlSetup();
     dfmemSetup(0);
     mpuSetup(1);
+    tiHSetup();
     cmdSetup();
 
     // Radio setup
@@ -75,7 +77,7 @@ int main() {
         delay_ms(250);
     }
 
-    LED_2 = ON;
+    LED_3 = ON;
 
     EnableIntT2;
     while(1){

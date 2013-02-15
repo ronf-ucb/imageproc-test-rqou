@@ -31,13 +31,17 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
 
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
     MacPacket rx_packet;
+    Payload rx_payload;
+    unsigned char command;
 
     if (!radioRxQueueEmpty())
     {
         // Check for unprocessed packet
         rx_packet = radioDequeueRxPacket();
+        rx_payload = macGetPayload(rx_packet);
+        command = payGetType(rx_payload);
         if(rx_packet == NULL) return;
-
+        LED_RED = ~LED_RED;
         cmdPushFunc(rx_packet);   
     }
 

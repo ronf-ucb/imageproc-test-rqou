@@ -15,7 +15,7 @@ from serial import Serial, SerialException
 import numpy as np
 
 from xbee import XBee
-from struct import unpack
+from struct import *
 
 kTimeout = 5
 kRtscts = 0
@@ -29,7 +29,7 @@ kTestRadioCmd   = 0
 kTestGyroCmd    = 1
 kTestAccelCmd   = 2
 kTestDFlashCmd  = 3
-kTestMotorCmd   = 0x80
+kTestMotorCmd   = 128
 kTestSMACmd     = 5
 kTestMPUCmd     = 6
 

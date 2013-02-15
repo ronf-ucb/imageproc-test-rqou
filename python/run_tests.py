@@ -61,14 +61,14 @@ if __name__ == '__main__':
         while True:
             raw_input("Press any key to continue...")
             
-            print('\nI: Testing radio communication:')
-            ts.test_radio()
+            # print('\nI: Testing radio communication:')
+            # ts.test_radio()
 
             print('\nI: Testing motors:\n')
             ts.test_motorop()
 
-            print('\nI: Testing MPU6000:\n')
-            ts.test_mpu()
+            # print('\nI: Testing MPU6000:\n')
+            # ts.test_mpu()
     
         #print('\nI: Testing motor channel 1')
         #ts.test_motor_basic()

@@ -34,6 +34,8 @@
         <itemPath>../imageproc-lib/mpu6000.h</itemPath>
         <itemPath>../imageproc-lib/dfmem.h</itemPath>
         <itemPath>../imageproc-lib/blink.h</itemPath>
+        <itemPath>../imageproc-lib/tih.c</itemPath>
+        <itemPath>../imageproc-lib/tih.h</itemPath>
       </logicalFolder>
       <itemPath>init.c</itemPath>
       <itemPath>interrupts.c</itemPath>
@@ -58,6 +60,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../imageproc-lib</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">

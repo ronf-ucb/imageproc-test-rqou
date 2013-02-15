@@ -62,7 +62,7 @@ if __name__ == '__main__':
             raw_input("Press any key to continue...")
             
             # print('\nI: Testing radio communication:')
-            # ts.test_radio()
+            ts.test_radio()
 
             print('\nI: Testing motors:\n')
             ts.test_motorop()

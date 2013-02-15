@@ -31,6 +31,7 @@
 #include "sclock.h"
 #include "spi_controller.h"
 #include "interrupts.h"
+#include "pid-ip2.5.h"
 #include "cmd.h"
 #include <stdlib.h>
 
@@ -39,26 +40,23 @@ MacPacket rx_packet;
 Test* test;
 
 int main() {
+   
+    while(1){LED_1 = ON;}
     fun_queue = queueInit(FUN_Q_LEN);
     test_function tf;
-
+    
     /* Initialization */
     SetupClock();
     SwitchClocks();
     SetupPorts();
-
     SetupInterrupts();
-    //SetupI2C();
-    //SetupADC();
     SetupTimer1();
-    //SetupPWM();
     SetupTimer2();
     sclockSetup();
-    //gyroSetup();
-    //xlSetup();
     dfmemSetup(0);
     mpuSetup(1);
     tiHSetup();
+    pidSetup();
     cmdSetup();
 
     // Radio setup

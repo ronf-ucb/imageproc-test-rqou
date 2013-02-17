@@ -470,7 +470,7 @@ void pidSetControl()
 void UpdatePID(pidPos *pid)
 {
     pid->p = ((long)pid->Kp * pid->p_error) >> 12 ;  // scale so doesn't over flow
-    pid->i = (long)pid->Ki  * pid->i_error;
+    pid->i = (long)pid->Ki  * pid->i_error >>12 ;
     pid->d=(long)pid->Kd *  (long) pid->v_error;
     // better check scale factors
 
@@ -479,7 +479,9 @@ void UpdatePID(pidPos *pid)
 		(pid->d >> 4); // divide by 16
 	pid->output = pid->preSat;
  
-	pid-> i_error = (long)pid-> i_error + (long)pid->p_error; // integrate error
+/* i_error say up to 1 rev error 0x10000, X 256 ms would be 0x1 00 00 00  
+    scale p_error by 16, so get 12 bit angle value*/
+	pid-> i_error = (long)pid-> i_error + ((long)pid->p_error >> 4); // integrate error
 // saturate output - assume only worry about >0 for now
 // apply anti-windup to integrator  
 	if (pid->preSat > MAXTHROT) 

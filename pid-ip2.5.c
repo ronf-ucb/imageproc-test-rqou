@@ -79,10 +79,10 @@ void pidSetup()
 //  initialize PID structures before starting Timer1
 	pidSetInput(0,0,0);
 	pidSetInput(1,0,0);
-
-	EnableIntT1; // turn on pid interrupts
 	
-	calibBatteryOffset(100);
+	EnableIntT1; // turn on pid interrupts
+
+	//calibBatteryOffset(100); This is broken for 2.5
 }
 
 
@@ -306,12 +306,13 @@ void EmergencyStop(void)
 /* turn off when all PIDs have finished */
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) 
 { int j;
-//  unsigned long time_start, time_end; 
-//	time_start =  sclockGetTime();
-
+  unsigned long time_start, time_end; 
+	
     if (t1_ticks == T1_MAX) t1_ticks = 0;
     t1_ticks++;
+	time_start =  sclockGetTime();
     pidGetState();	// always update state, even if motor is coasting
+	time_end = sclockGetTime() - time_start;
  // only update tracking setpoint if time has not yet expired
 	for (j = 0; j< NUM_PIDS; j++)
    	{     if ((pidObjs[j].start_time + pidObjs[j].run_time) >=  t1_ticks)
@@ -324,7 +325,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
    	}  
 
 	pidSetControl();	// run control even if not updating setpoint to hold position 
-//	time_end =  sclockGetTime();
+        j = 5;
     //Clear Timer1 interrupt flag
     _T1IF = 0;
 }
@@ -354,13 +355,15 @@ void pidGetSetpoint(int j)
 }
 
  // select either back emf or backwd diff for vel est
-#define VEL_BEMF 1
+#define VEL_BEMF 0
 
 /* update state variables including motor position and velocity */
 
 void pidGetState()
 {   int i;
-	long p_state;
+	long p_state; 
+	unsigned long time_start, time_end; 
+	calib_flag = 0;  //BEMF disable
 // get diff amp offset with motor off at startup time
 	if(calib_flag)
 	{ 	
@@ -374,15 +377,20 @@ void pidGetState()
 	for(i=0; i<NUM_PIDS; i++)
 	{ oldpos[i] = pidObjs[i].p_state; }
 #endif
+	
+	time_start =  sclockGetTime();
 
 // only works to +-32K revs- might reset after certain number of steps? Should wrap around properly
 	for(i =0; i<NUM_PIDS; i++)
-	{	amsGetPos(i);
+	{	//amsGetPos(i);
 	      p_state = (long)(encPos[i].pos << 2);		// pos 14 bits 0x0 -> 0x3fff
 	      p_state = p_state + (encPos[i].oticks << 16);
 		p_state = p_state - (long)(encPos[i].offset <<2); 	// subtract offset to get zero position
 		pidObjs[i].p_state = p_state;
 	}
+
+	time_end = sclockGetTime() - time_start;
+
 
 #if VEL_BEMF == 0    // use first difference on position for velocity estimate
 	for(i=0; i<NUM_PIDS; i++)

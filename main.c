@@ -23,6 +23,7 @@
 #include "queue.h"
 #include "radio.h"
 #include "tih.h"
+#include "ams-enc.h"
 #include "radio_settings.h"
 #include "tests.h" // TODO (fgb) : define/includes need to live elsewhere
 #include "dfmem.h"
@@ -33,6 +34,7 @@
 #include "interrupts.h"
 #include "pid-ip2.5.h"
 #include "cmd.h"
+
 #include <stdlib.h>
 
 Payload rx_payload;
@@ -40,55 +42,53 @@ MacPacket rx_packet;
 Test* test;
 
 int main() {
-   
-    while(1){LED_1 = ON;}
+
     fun_queue = queueInit(FUN_Q_LEN);
     test_function tf;
     
     /* Initialization */
-    SetupClock();
-    SwitchClocks();
-    SetupPorts();
-    SetupInterrupts();
-    SetupTimer1();
-    SetupTimer2();
-    sclockSetup();
-    dfmemSetup(0);
-    mpuSetup(1);
-    tiHSetup();
-    pidSetup();
-    cmdSetup();
+   SetupClock();
+   SwitchClocks();
+   SetupPorts();
+   SetupInterrupts();
+   SetupTimer2();
+   sclockSetup();
+   dfmemSetup(0);
+   mpuSetup(1);
+   tiHSetup();
+   amsHallSetup();
+   cmdSetup();
+   pidSetup();  //T1 currently disabled amsSetup?
+   // Radio setup
+   radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
+   radioSetChannel(RADIO_MY_CHAN);
+   radioSetSrcAddr(RADIO_SRC_ADDR);
+   radioSetSrcPanID(RADIO_PAN_ID);
+   setupTimer6(RADIO_FCY); // Radio and buffer loop timer
 
-    // Radio setup
-    radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
-    radioSetChannel(RADIO_MY_CHAN);
-    radioSetSrcAddr(RADIO_SRC_ADDR);
-    radioSetSrcPanID(RADIO_PAN_ID);
-    setupTimer6(RADIO_FCY); // Radio and buffer loop timer
+   char j;
+   for(j=0; j<3; j++){
+       LED_2 = ON;
+       delay_ms(250);
+       LED_2 = OFF;
+       delay_ms(250);
+   }
 
+   LED_3 = ON;
 
-    char j;
-    for(j=0; j<3; j++){
-        LED_2 = ON;
-        delay_ms(250);
-        LED_2 = OFF;
-        delay_ms(250);
-    }
+   EnableIntT2;
+   while(1){
+       while(!queueIsEmpty(fun_queue))
+       {
+           test = queuePop(fun_queue);
+           rx_payload = macGetPayload(test->packet);
+           tf = test->tf;
+           (*tf)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload));
+           payDelete(rx_payload);      //Ron's code doesn't do this
+           radioReturnPacket(test->packet);
+           free(test);
+       }
+   }
+   return 0;
 
-    LED_3 = ON;
-
-    EnableIntT2;
-    while(1){
-        while(!queueIsEmpty(fun_queue))
-        {
-            test = queuePop(fun_queue);
-            rx_payload = macGetPayload(test->packet);
-            tf = test->tf;
-            (*tf)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload));
-            payDelete(rx_payload);      //Ron's code doesn't do this
-            radioReturnPacket(test->packet);
-            free(test);
-        }
-    }
-    return 0;
 }

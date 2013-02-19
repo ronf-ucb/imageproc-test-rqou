@@ -324,7 +324,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 		pidObjs[1].onoff = 0;
    	}  
 
-	pidSetControl();	// run control even if not updating setpoint to hold position 
+	pidSetControl();	// run control even if not updating setpoint to hold position
         j = 5;
     //Clear Timer1 interrupt flag
     _T1IF = 0;
@@ -382,11 +382,19 @@ void pidGetState()
 
 // only works to +-32K revs- might reset after certain number of steps? Should wrap around properly
 	for(i =0; i<NUM_PIDS; i++)
-	{	//amsGetPos(i);
+	{     amsGetPos(i);
 	      p_state = (long)(encPos[i].pos << 2);		// pos 14 bits 0x0 -> 0x3fff
 	      p_state = p_state + (encPos[i].oticks << 16);
 		p_state = p_state - (long)(encPos[i].offset <<2); 	// subtract offset to get zero position
-		pidObjs[i].p_state = p_state;
+		if (i==0)
+		{
+			pidObjs[i].p_state = -p_state; //fix fo encoder alignment
+		}
+		else
+		{
+			pidObjs[i].p_state = p_state;
+		}
+		
 	}
 
 	time_end = sclockGetTime() - time_start;

@@ -58,7 +58,8 @@ int main() {
    tiHSetup();
    amsHallSetup();
    cmdSetup();
-   pidSetup();  //T1 currently disabled amsSetup?
+   pidSetup();
+
    // Radio setup
    radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
    radioSetChannel(RADIO_MY_CHAN);
@@ -66,13 +67,13 @@ int main() {
    radioSetSrcPanID(RADIO_PAN_ID);
    setupTimer6(RADIO_FCY); // Radio and buffer loop timer
 
-   char j;
-   for(j=0; j<3; j++){
-       LED_2 = ON;
-       delay_ms(250);
-       LED_2 = OFF;
-       delay_ms(250);
-   }
+//   char j;
+//   for(j=0; j<3; j++){
+//       LED_2 = ON;
+//       delay_ms(250);
+//       LED_2 = OFF;
+//       delay_ms(250);
+//   }
 
    LED_3 = ON;
 

@@ -26,11 +26,14 @@
 void (*cmd_func[MAX_CMD_FUNC])(unsigned char, unsigned char, unsigned char, unsigned char*);
 void cmdError(void);
 
+extern pidPos pidObjs[NUM_PIDS];
+
 /*-----------------------------------------------------------------------------
  *          Declaration of static functions
 -----------------------------------------------------------------------------*/
 static void cmdNop(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdWhoAmI(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
+static void cmdGetAMSPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 
 //Motor and PID functions
 static void cmdSetThrustOpenLoop(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
@@ -55,6 +58,7 @@ void cmdSetup(void) {
     cmd_func[CMD_PID_START_MOTORS] = &cmdPIDStartMotors;
     cmd_func[CMD_SET_VEL_PROFILE] = &cmdSetVelProfile;
     cmd_func[CMD_WHO_AM_I] = &cmdWhoAmI;
+    cmd_func[CMD_GET_AMS_POS] = &cmdGetAMSPos;
 
 }
 
@@ -93,6 +97,16 @@ void cmdWhoAmI(unsigned char type, unsigned char status, unsigned char length, u
 	radioConfirmationPacket(RADIO_DEST_ADDR, CMD_WHO_AM_I, status, string_length, version_string);  
       return; //success
 }
+
+void cmdGetAMSPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) 
+{ 	long motor_count[2]; 
+	motor_count[0] = pidObjs[0].p_state;
+	motor_count[1] = pidObjs[1].p_state;
+
+	radioConfirmationPacket(RADIO_DEST_ADDR, CMD_GET_AMS_POS,\
+		 status, sizeof(motor_count), (unsigned char *)motor_count);  
+}
+
 // ==== Motor PID Commands ======================================================================================
 // ================================================================================================================ 
 
@@ -101,7 +115,7 @@ void cmdSetThrustOpenLoop(unsigned char type, unsigned char status, unsigned cha
 	int thrust2 = frame[2] + (frame[3] << 8);
 	unsigned int run_time_ms = frame[4] + (frame[5] << 8);
 
-	//DisableIntT1;	// since PID interrupt overwrites PWM values
+	DisableIntT1;	// since PID interrupt overwrites PWM values
 
   	tiHSetDC(1, thrust1);
 	tiHSetDC(2, thrust2); 
@@ -109,7 +123,7 @@ void cmdSetThrustOpenLoop(unsigned char type, unsigned char status, unsigned cha
 	tiHSetDC(1,0);
 	tiHSetDC(2,0);
 
-	//EnableIntT1;
+	EnableIntT1;
  } 
 
  void cmdSetPIDGains(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame){

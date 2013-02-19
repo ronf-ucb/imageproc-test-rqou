@@ -9,6 +9,7 @@
 #define CMD_SET_THRUST_OPENLOOP     0x80
 #define CMD_PID_START_MOTORS		0x81
 #define CMD_SET_PID_GAINS  			0x82
+#define CMD_GET_AMS_POS				0x84
 #define CMD_SET_VEL_PROFILE			0x8C
 #define CMD_WHO_AM_I 				0x8D
 

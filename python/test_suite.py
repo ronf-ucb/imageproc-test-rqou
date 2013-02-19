@@ -33,6 +33,12 @@ kTestMotorCmd   = 128
 kTestSMACmd     = 5
 kTestMPUCmd     = 6
 
+SetVelProfile   =   0x8C
+PIDStartMotors  =   0x81
+SetPIDGains     =   0x82
+GetAMSPos       =   0x84
+WhoAmI          =   0x8D                    
+
 #kImWidth = 160
 #kImHeight = 100
 
@@ -111,6 +117,10 @@ class TestSuite():
             print unpack('50H', rf_data[2:])
         elif typeID == kTestMPUCmd:
             print unpack('7h', rf_data[2:])
+        elif typeID == GetAMSPos:
+            print 'Previous motor positions:',
+            motor = unpack('=2l', rf_data[2:])
+            print 'motor 0= %d' %motor[0] + ' motor 1= %d' %motor[1]
 
     def test_radio(self):
         '''
@@ -132,17 +142,56 @@ class TestSuite():
                 self.print_packet(self.last_packet)
             time.sleep(1)
 
+    def test_amspos(self):
+        header = chr(kStatusUnused) + chr(GetAMSPos)
+        if(self.check_conn()):
+            self.radio.tx(dest_addr=self.dest_addr, data=header)
+            time.sleep(0.2)
+            # self.print_packet(self.last_packet)
+
+
     def test_motorop(self):
         '''
         Description:
             Test motors open loop
         '''
         header = chr(kStatusUnused) + chr(kTestMotorCmd)
-        thrust = [500, 500, 2000]
+        thrust = [0x700, 0x700, 2000]
         data_out = header + ''.join(pack("3h",*thrust))
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
+
+    def test_pid(self):  
+        header = chr(kStatusUnused) + chr(SetPIDGains)
+        motorgains = [400,0,0,0,0, 400,0,0,0,0]
+        data_out = header + ''.join(pack("10h",*motorgains))
+        if(self.check_conn()):
+            self.radio.tx(dest_addr=self.dest_addr, data=data_out)
+            time.sleep(0.2)
+
+        header = chr(kStatusUnused) + chr(SetVelProfile)
+        delta = [0x4000,0x4000,0x4000,0x4000]
+        vel = [128, 128,128,128]  
+        intervals = [128, 128, 128, 128]
+        temp = intervals+delta+vel
+        temp = temp+temp 
+        data_out = header + ''.join(pack("24h",*temp))
+
+        if(self.check_conn()):
+            self.radio.tx(dest_addr=self.dest_addr, data=data_out)
+            time.sleep(0.2)
+
+        header = chr(kStatusUnused) + chr(PIDStartMotors)
+        thrust = [0, 2000, 0, 2000, 0]
+        data_out = header + ''.join(pack("5h",*thrust))
+        if(self.check_conn()):
+            self.radio.tx(dest_addr=self.dest_addr, data=data_out)
+            time.sleep(0.2)
+
+
+
+
 
     def test_gyro(self, num_test_packets):
         '''

@@ -82,13 +82,13 @@ int main() {
    long count = 1000;
    while(1){
        //radioProcess();
-       if(--count == 0) {
+       /*if(--count == 0) {
            count = 4000;
            amsEncoderStartAsyncRead();
            //amsEncoderBlockingRead(0);
            //amsEncoderBlockingRead(1);
-       }
-       
+       }*/
+       radioProcess();
        while(!queueIsEmpty(fun_queue))
        {
            test = queuePop(fun_queue);

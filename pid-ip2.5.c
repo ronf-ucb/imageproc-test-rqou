@@ -304,10 +304,16 @@ void EmergencyStop(void)
 
 /* update setpoint  only leg which has run_time + start_time > t1_ticks */
 /* turn off when all PIDs have finished */
+volatile unsigned char interrupt_count = 0;
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) 
 { int j;
   unsigned long time_start, time_end; 
-	
+  LED_3 = 1;
+  interrupt_count++;
+  if(interrupt_count == 4) {
+      amsEncoderStartAsyncRead();
+  } else if(interrupt_count == 5) {
+      interrupt_count = 0;
     if (t1_ticks == T1_MAX) t1_ticks = 0;
     t1_ticks++;
 	time_start =  sclockGetTime();
@@ -326,7 +332,9 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 
 	pidSetControl();	// run control even if not updating setpoint to hold position
         j = 5;
+  }
     //Clear Timer1 interrupt flag
+        LED_3 = 0;
     _T1IF = 0;
 }
 
@@ -383,7 +391,7 @@ void pidGetState()
 // only works to +-32K revs- might reset after certain number of steps? Should wrap around properly
 	for(i =0; i<NUM_PIDS; i++)
 	{     //amsGetPos(i);
-            //amsEncoderBlockingRead(i);
+            //amsEncoderStartAsyncRead();
 	      p_state = (long)(encPos[i].pos << 2);		// pos 14 bits 0x0 -> 0x3fff
 	      p_state = p_state + (encPos[i].oticks << 16);
 		p_state = p_state - (long)(encPos[i].offset <<2); 	// subtract offset to get zero position

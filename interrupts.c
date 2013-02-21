@@ -68,6 +68,6 @@ void setupTimer6(unsigned int fs) {
 }
 
 void __attribute__((interrupt, no_auto_psv)) _T6Interrupt(void) {
-    radioProcess();
+    //radioProcess();
     _T6IF = 0;
 }

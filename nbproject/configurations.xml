@@ -40,6 +40,10 @@
         <itemPath>../imageproc-lib/adc_pid.h</itemPath>
         <itemPath>../imageproc-lib/ams-enc.c</itemPath>
         <itemPath>../imageproc-lib/ams-enc.h</itemPath>
+        <itemPath>../imageproc-lib/uart_driver.c</itemPath>
+        <itemPath>../imageproc-lib/uart_driver.h</itemPath>
+        <itemPath>../imageproc-lib/battery.c</itemPath>
+        <itemPath>../imageproc-lib/battery.h</itemPath>
       </logicalFolder>
       <itemPath>init.c</itemPath>
       <itemPath>interrupts.c</itemPath>
@@ -252,7 +256,7 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.end" value="0x157ff"/>
         <property key="memories.programmemory.start" value="0x0"/>
-        <property key="poweroptions.powerenable" value="true"/>
+        <property key="poweroptions.powerenable" value="false"/>
         <property key="programmertogo.imagename" value=""/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.pgmspeed" value="2"/>

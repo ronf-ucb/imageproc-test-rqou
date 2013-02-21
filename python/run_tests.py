@@ -47,7 +47,7 @@ import test_suite
 RADIO_DEV_NAME = 'COM9'
 BS_BAUDRATE = 230400
 
-DEST_ADDR = '\x21\x02'
+DEST_ADDR = '\x20\x72'
 
 if __name__ == '__main__':
     try:
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         #ts.test_radio()
         
         while True:
-            raw_input("Press any key to continue...")
+            #raw_input("Press any key to continue...")
             
             # print('\nI: Testing radio communication:')
            # ts.test_radio()

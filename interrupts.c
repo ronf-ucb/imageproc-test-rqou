@@ -41,7 +41,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
         rx_payload = macGetPayload(rx_packet);
         command = payGetType(rx_payload);
         if(rx_packet == NULL) return;
-        LED_RED = ~LED_RED;
+        LED_2 = ~LED_2;
         cmdPushFunc(rx_packet);   
     }
 

@@ -226,7 +226,7 @@ void pidOn(int pid_num){
 void pidZeroPos(int pid_num){ 
 // disable interrupts to reset state variables
 	DisableIntT1; // turn off pid interrupts
-	amsHallSetup(); //  reinitialize rev count and relative zero encoder position for both motors
+	amsEncoderResetPos(); //  reinitialize rev count and relative zero encoder position for both motors
 	pidObjs[pid_num].p_state = 0;
 // reset position setpoint as well
 	pidObjs[pid_num].p_input = 0;
@@ -382,7 +382,8 @@ void pidGetState()
 
 // only works to +-32K revs- might reset after certain number of steps? Should wrap around properly
 	for(i =0; i<NUM_PIDS; i++)
-	{     amsGetPos(i);
+	{     //amsGetPos(i);
+            //amsEncoderBlockingRead(i);
 	      p_state = (long)(encPos[i].pos << 2);		// pos 14 bits 0x0 -> 0x3fff
 	      p_state = p_state + (encPos[i].oticks << 16);
 		p_state = p_state - (long)(encPos[i].offset <<2); 	// subtract offset to get zero position

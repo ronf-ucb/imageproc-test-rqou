@@ -8,11 +8,11 @@
 #define __RADIO_SETTINGS_H
 
 
-#define RADIO_MY_CHAN         0x0E
+#define RADIO_MY_CHAN         0x0D
 
-#define RADIO_PAN_ID          0x2100
-#define RADIO_DEST_ADDR       0x2101
-#define RADIO_SRC_ADDR        0x2102
+#define RADIO_PAN_ID          0x2070
+#define RADIO_DEST_ADDR       0x2071
+#define RADIO_SRC_ADDR        0x2072
 
 #define RADIO_TXPQ_MAX_SIZE   30
 #define RADIO_RXPQ_MAX_SIZE   10

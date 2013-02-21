@@ -4,6 +4,7 @@
 #include "uart.h"
 #include "pwm.h"
 #include "ports.h"
+extern unsigned long t1_ticks;
 
 
 void SetupADC(void)
@@ -99,12 +100,18 @@ void SetupInterrupts(void)
     ConfigIntTimer2(T2_INT_PRIOR_4 & T2_INT_OFF);
 }
 
+// timer 1 is used for main pid motor control loop
 void SetupTimer1(void)
 {
     unsigned int T1CON1value, T1PERvalue;
-    T1CON1value = T1_ON & T1_SOURCE_INT & T1_PS_1_8 & T1_GATE_OFF &
+/*    T1CON1value = T1_ON & T1_SOURCE_INT & T1_PS_1_8 & T1_GATE_OFF &
                   T1_SYNC_EXT_OFF;
-    T1PERvalue = 0x01F4; //clock period = 0.0001s = ((T1PERvalue * prescaler)/FCY) (10000Hz)
+    T1PERvalue = 0x01F4; //clock period = 0.0001s = ((T1PERvalue * prescaler)/FCY) (10000Hz) */
+   T1CON1value = T1_ON & T1_SOURCE_INT & T1_PS_1_1 & T1_GATE_OFF &
+                  T1_SYNC_EXT_OFF & T1_INT_PRIOR_7;
+                
+    T1PERvalue = 0x9C40; //clock period = 0.001s = (T1PERvalue/FCY) (1KHz)
+  t1_ticks = 0;
     OpenTimer1(T1CON1value, T1PERvalue);
 }
 

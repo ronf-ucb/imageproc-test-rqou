@@ -38,7 +38,7 @@
 #  Fernando L. Garcia Bermudez      2012-8-20    Initial release
 #
 
-import sys, traceback
+import msvcrt, sys, traceback
 import test_suite
 
 
@@ -49,31 +49,51 @@ BS_BAUDRATE = 230400
 
 DEST_ADDR = '\x21\x02'
 
+motorgains = [800,200,400,0,0, 800,200,400,0,0] #TUNE THESE
+duration = 2000
+
+
 if __name__ == '__main__':
     try:
         ts = test_suite.TestSuite(RADIO_DEV_NAME,            \
                                   baud_rate=BS_BAUDRATE, \
                                   dest_addr=DEST_ADDR  )
 
-        #print('\nI: Testing radio communication:')
-        #ts.test_radio()
-        
-        while True:
-            raw_input("Press any key to continue...")
-            
-            # print('\nI: Testing radio communication:')
-           # ts.test_radio()
-            ts.test_amspos()
-            #print('\nI: Testing motors:\n')
-            #ts.test_pid()
+        #Initialization
+        ts.SetGains(motorgains)
 
-            # print('\nI: Testing MPU6000:\n')
-            # ts.test_mpu()
+
+        while msvcrt.kbhit():
+            ch = msvcrt.getch()
+
+        while True:
+            keypress = msvcrt.getch()
+            print '>',
+
+            if keypress == 'p':
+                ts.PIDStart(duration)
+            elif keypress == 'm':
+                ts.test_motorop()
+
+            elif keypress == 't':
+                print 'Current duration '+str(duration)+', New duration in ms:',
+                duration = int(raw_input())    
+                print 'Current duration '+str(duration)
+
+            elif keypress == 'g':
+                ts.SetGains(motorgains)
+
+            elif keypress == 'i':
+                ts.SetProfile()
+
+            elif keypress == 'q':
+                ts.quit()
+            else:
+                print "** unknown keyboard command** \n"
+                
+
     
-        #print('\nI: Testing motor channel 1')
-        #ts.test_motor_basic()
-        #ts.test_motor()
-        #ts.test_sma()
+
 
         ts.__del__()
         sys.exit(0)

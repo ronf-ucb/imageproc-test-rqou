@@ -42,9 +42,9 @@ WhoAmI          =   0x8D
 #kImWidth = 160
 #kImHeight = 100
 
-
 ON = 1
 OFF = 0
+
 
 class TestSuite():
     '''Class representing the ImageProc test suite'''
@@ -162,34 +162,49 @@ class TestSuite():
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
 
-    def test_pid(self):  
+    def SetGains(self, motorgains):
         header = chr(kStatusUnused) + chr(SetPIDGains)
-        motorgains = [400,0,0,0,0, 400,0,0,0,0]
+        print  'Gains: ' + str(motorgains)
         data_out = header + ''.join(pack("10h",*motorgains))
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
 
+    def SetProfile(self):
         header = chr(kStatusUnused) + chr(SetVelProfile)
         delta = [0x4000,0x4000,0x4000,0x4000]
-        vel = [128, 128,128,128]  
-        intervals = [128, 128, 128, 128]
+        vel = [128, 64,64,128]
+        
+        print 'Enter intervals <csv>: ',
+        x = raw_input()
+        if len(x):
+            intervals = map(int,x.split(','))
+            for i in range(0,4):
+                intervals[i] = intervals[i]  # interval in ms
+                vel[i] = (delta[i])/intervals[i]
+
         temp = intervals+delta+vel
+        print 'Int, Delta, Vel: '+str(temp)
         temp = temp+temp 
         data_out = header + ''.join(pack("24h",*temp))
 
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
-
+            
+    def PIDStart(self, duration):
         header = chr(kStatusUnused) + chr(PIDStartMotors)
-        thrust = [0, 2000, 0, 2000, 0]
+        thrust = [0, duration, 0, duration, 0]
         data_out = header + ''.join(pack("5h",*thrust))
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
 
-
+    def quit(self):
+        print "Exit."
+        self.radio.halt()
+        self.conn.close()
+        sys.exit(0)
 
 
 

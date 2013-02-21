@@ -82,7 +82,7 @@ void pidSetup()
 	
 	EnableIntT1; // turn on pid interrupts
 
-	//calibBatteryOffset(100); This is broken for 2.5
+	calibBatteryOffset(100); //???This is broken for 2.5
 }
 
 
@@ -305,14 +305,10 @@ void EmergencyStop(void)
 /* update setpoint  only leg which has run_time + start_time > t1_ticks */
 /* turn off when all PIDs have finished */
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) 
-{ int j;
-  unsigned long time_start, time_end; 
-	
+{ 	int j;
     if (t1_ticks == T1_MAX) t1_ticks = 0;
     t1_ticks++;
-	time_start =  sclockGetTime();
     pidGetState();	// always update state, even if motor is coasting
-	time_end = sclockGetTime() - time_start;
  // only update tracking setpoint if time has not yet expired
 	for (j = 0; j< NUM_PIDS; j++)
    	{     if ((pidObjs[j].start_time + pidObjs[j].run_time) >=  t1_ticks)
@@ -325,7 +321,6 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
    	}  
 
 	pidSetControl();	// run control even if not updating setpoint to hold position
-        j = 5;
     //Clear Timer1 interrupt flag
     _T1IF = 0;
 }

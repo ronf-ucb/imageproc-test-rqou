@@ -67,13 +67,13 @@ int main() {
    radioSetSrcPanID(RADIO_PAN_ID);
    setupTimer6(RADIO_FCY); // Radio and buffer loop timer
 
-//   char j;
-//   for(j=0; j<3; j++){
-//       LED_2 = ON;
-//       delay_ms(250);
-//       LED_2 = OFF;
-//       delay_ms(250);
-//   }
+   char j;
+   for(j=0; j<3; j++){
+       LED_2 = ON;
+       delay_ms(5);
+       LED_2 = OFF;
+       delay_ms(5);
+   }
 
    LED_3 = ON;
 

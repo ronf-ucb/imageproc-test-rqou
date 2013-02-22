@@ -90,7 +90,8 @@ if __name__ == '__main__':
 
             elif keypress == 'i':
                 ts.SetProfile()
-
+            elif keypress == 'a':
+                ts.test_amspos()
             elif keypress == 'q':
                 ts.quit()
             else:

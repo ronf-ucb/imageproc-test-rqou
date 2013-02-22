@@ -61,7 +61,7 @@ int main() {
    amsEncoderSetup();
    cmdSetup();
    pidSetup();
-   uartInit(&cmdPushFunc);
+   //uartInit(&cmdPushFunc);
 
    // Radio setup
    radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);

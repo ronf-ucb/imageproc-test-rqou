@@ -304,7 +304,6 @@ void EmergencyStop(void)
 volatile unsigned char interrupt_count = 0;
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) 
 { int j;
-  unsigned long time_start, time_end; 
   LED_3 = 1;
   interrupt_count++;
   if(interrupt_count == 4) {
@@ -324,6 +323,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
     //Clear Timer1 interrupt flag
         LED_3 = 0;
     _T1IF = 0;
+	}
 }
 
 // update desired velocity and position tracking setpoints for each leg

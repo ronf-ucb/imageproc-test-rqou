@@ -108,8 +108,8 @@ void cmdGetAMSPos(unsigned char type, unsigned char status, unsigned char length
 	motor_count[0] = pidObjs[0].p_state;
 	motor_count[1] = pidObjs[1].p_state;
 
-        /*motor_count[0] = encPos[0].pos;
-	motor_count[1] = encPos[1].pos;*/
+ 	// motor_count[0] = encPos[0].pos;
+	// motor_count[1] = encPos[1].pos;
 
         radioConfirmationPacket(RADIO_DEST_ADDR, CMD_GET_AMS_POS,\
 		 status, sizeof(motor_count), (unsigned char *)motor_count);  
@@ -196,7 +196,7 @@ void cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char le
 
 void cmdPIDStartMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame)
 {
-	LED_2 = ~LED_2;
+	LED_1 = ~LED_1;
 	pidSetInput(0, 0);
 	pidOn(0);
 	pidSetInput(1, 0);

@@ -59,11 +59,12 @@ if __name__ == '__main__':
         #ts.test_radio()
         
         while True:
-            #raw_input("Press any key to continue...")
+            raw_input("Press any key to continue...")
             
             # print('\nI: Testing radio communication:')
            # ts.test_radio()
             ts.test_amspos()
+            #time.sleep(0.2)
             #print('\nI: Testing motors:\n')
             #ts.test_pid()
 

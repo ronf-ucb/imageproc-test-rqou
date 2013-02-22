@@ -43,7 +43,7 @@ MacPacket rx_packet;
 Test* test;
 
 int main() {
-    
+
     fun_queue = queueInit(FUN_Q_LEN);
     test_function tf;
     
@@ -54,11 +54,9 @@ int main() {
    sclockSetup();
    
    //SetupInterrupts();
-   
-   
    //dfmemSetup(0);
-   //mpuSetup(1);
-   //tiHSetup();
+   mpuSetup(1);
+   tiHSetup();
    LED_3 = 1;
 
    // Need delay for encoders to be ready
@@ -66,29 +64,30 @@ int main() {
    amsEncoderSetup();
    cmdSetup();
    pidSetup();
-   //uartInit();
+   uartInit(&cmdPushFunc);
 
    // Radio setup
    radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
    radioSetChannel(RADIO_MY_CHAN);
    radioSetSrcAddr(RADIO_SRC_ADDR);
    radioSetSrcPanID(RADIO_PAN_ID);
-   setupTimer6(RADIO_FCY); // Radio and buffer loop timer
-    SetupTimer2();
-    
-   EnableIntT2;
+
    LED_3 = 0;
    LED_1 = 1;
-   long count = 1000;
    while(1){
-       //radioProcess();
-       /*if(--count == 0) {
-           count = 4000;
-           amsEncoderStartAsyncRead();
-           //amsEncoderBlockingRead(0);
-           //amsEncoderBlockingRead(1);
-       }*/
+       // handles sending outgoing packets
        radioProcess();
+
+       // move received packets to function queue
+        while (!radioRxQueueEmpty())
+        {
+            // Check for unprocessed packet
+            rx_packet = radioDequeueRxPacket();
+            if(rx_packet == NULL) break;
+            cmdPushFunc(rx_packet);
+        }
+
+       // process commands from function queue
        while(!queueIsEmpty(fun_queue))
        {
            test = queuePop(fun_queue);

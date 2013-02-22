@@ -30,7 +30,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
 }
 
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
-    MacPacket rx_packet;
+    /*MacPacket rx_packet;
     Payload rx_payload;
     unsigned char command;
 
@@ -43,7 +43,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
         if(rx_packet == NULL) return;
         LED_2 = ~LED_2;
         cmdPushFunc(rx_packet);   
-    }
+    }*/
 
     _T2IF = 0;
 }

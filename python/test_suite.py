@@ -181,20 +181,20 @@ class TestSuite():
     def SetProfile(self):
         header = chr(kStatusUnused) + chr(SetVelProfile)
         delta = [0x4000,0x4000,0x4000,0x4000]
-        vel = [128, 64,64,128]
+        intervals = [128, 128, 128, 128]
         
-        print 'Enter intervals <csv>: ',
+        print 'Enter vels <csv>: ',
         x = raw_input()
         if len(x):
-            intervals = map(int,x.split(','))
+            vel = map(int,x.split(','))
             for i in range(0,4):
-                intervals[i] = intervals[i]  # interval in ms
-                vel[i] = (delta[i])/intervals[i]
+                if vel[i]<0:
+                    delta[i] = -delta[i]
+                intervals[i] = delta[i]/vel[i]
 
-        temp = intervals+delta+vel
+        temp = vel+vel
         print 'Int, Delta, Vel: '+str(temp)
-        temp = temp+temp 
-        data_out = header + ''.join(pack("24h",*temp))
+        data_out = header + ''.join(pack("8h",*temp))
 
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)

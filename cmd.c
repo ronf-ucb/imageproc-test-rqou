@@ -162,30 +162,26 @@ void cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char le
 	int idx = 0, i = 0;
 
 	for(i = 0; i < NUM_VELS; i ++){
-		interval[i] = frame[idx]+ (frame[idx+1]<<8);
-	 	idx+=2;	
-	 }
-	for(i = 0; i < NUM_VELS; i ++){
-		delta[i] = frame[idx]+ (frame[idx+1]<<8);
-	 	idx+=2; 	
-	 }
-	for(i = 0; i < NUM_VELS; i ++){
 		vel[i] = frame[idx]+ (frame[idx+1]<<8);
+		if(vel[i]<0){
+			delta[i] = -0x4000;   //hardcoded for now
+		} else {
+			delta[i] = 0x4000;
+		}
+		interval[i] = delta[i]/vel[i];
 	 	idx+=2; 	
 	 }
 
 	setPIDVelProfile(0, interval, delta, vel);
 
 	for(i = 0; i < NUM_VELS; i ++){
-		interval[i] = frame[idx]+ (frame[idx+1]<<8);
-	 	idx+=2;	
-	 }
-	for(i = 0; i < NUM_VELS; i ++){
-		delta[i] = frame[idx]+ (frame[idx+1]<<8);
-	 	idx+=2; 	
-	 }
-	for(i = 0; i < NUM_VELS; i ++){
 		vel[i] = frame[idx]+ (frame[idx+1]<<8);
+		if(vel[i]<0){
+			delta[i] = -0x4000;   //hardcoded for now
+		} else {
+			delta[i] = 0x4000;
+		}
+		interval[i] = delta[i]/vel[i];
 	 	idx+=2; 	
 	 }
 	setPIDVelProfile(1, interval, delta, vel);
@@ -197,7 +193,7 @@ void cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char le
 
 void cmdPIDStartMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame)
 {
-	LED_1 = ~LED_1;
+	LED_3 = ~LED_3;
 	pidSetInput(0, 0);
 	pidOn(0);
 	pidSetInput(1, 0);

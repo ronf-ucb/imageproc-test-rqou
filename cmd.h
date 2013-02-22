@@ -6,6 +6,7 @@
 #include "cmd_const.h"
 
 #define CMD_TEST_RADIO				0x00
+#define CMD_TEST_MPU				0x06
 #define CMD_SET_THRUST_OPENLOOP     0x80
 #define CMD_PID_START_MOTORS		0x81
 #define CMD_PID_STOP_MOTORS			0x8E

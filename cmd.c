@@ -18,7 +18,7 @@
 #include "timer.h"
 #include "tih.h"
 #include "pid-ip2.5.h"
-
+#include "ams-enc.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -27,6 +27,7 @@ void (*cmd_func[MAX_CMD_FUNC])(unsigned char, unsigned char, unsigned char, unsi
 void cmdError(void);
 
 extern pidPos pidObjs[NUM_PIDS];
+extern EncObj encPos[NUM_ENC];
 
 /*-----------------------------------------------------------------------------
  *          Declaration of static functions
@@ -67,7 +68,9 @@ void cmdSetup(void) {
 void cmdPushFunc(MacPacket rx_packet)
 {   Payload rx_payload;
     unsigned char command;  
-	 rx_payload = macGetPayload(rx_packet);
+
+    LED_2 = ~LED_2;
+    rx_payload = macGetPayload(rx_packet);
 	 
 	 Test* test = (Test*) malloc(sizeof(Test));
      if(!test) return;
@@ -105,7 +108,10 @@ void cmdGetAMSPos(unsigned char type, unsigned char status, unsigned char length
 	motor_count[0] = pidObjs[0].p_state;
 	motor_count[1] = pidObjs[1].p_state;
 
-	radioConfirmationPacket(RADIO_DEST_ADDR, CMD_GET_AMS_POS,\
+        /*motor_count[0] = encPos[0].pos;
+	motor_count[1] = encPos[1].pos;*/
+
+        radioConfirmationPacket(RADIO_DEST_ADDR, CMD_GET_AMS_POS,\
 		 status, sizeof(motor_count), (unsigned char *)motor_count);  
 }
 

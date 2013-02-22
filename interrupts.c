@@ -30,7 +30,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
 }
 
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
-    MacPacket rx_packet;
+    /*MacPacket rx_packet;
     Payload rx_payload;
     unsigned char command;
 
@@ -41,9 +41,9 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void) {
         rx_payload = macGetPayload(rx_packet);
         command = payGetType(rx_payload);
         if(rx_packet == NULL) return;
-        LED_RED = ~LED_RED;
+        LED_2 = ~LED_2;
         cmdPushFunc(rx_packet);   
-    }
+    }*/
 
     _T2IF = 0;
 }
@@ -68,6 +68,6 @@ void setupTimer6(unsigned int fs) {
 }
 
 void __attribute__((interrupt, no_auto_psv)) _T6Interrupt(void) {
-    radioProcess();
+    //radioProcess();
     _T6IF = 0;
 }

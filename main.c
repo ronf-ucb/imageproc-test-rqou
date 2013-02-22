@@ -34,6 +34,7 @@
 #include "interrupts.h"
 #include "pid-ip2.5.h"
 #include "cmd.h"
+#include "uart_driver.h"
 
 #include <stdlib.h>
 
@@ -50,46 +51,49 @@ int main() {
    SetupClock();
    SwitchClocks();
    SetupPorts();
-   SetupInterrupts();
-   SetupTimer2();
    sclockSetup();
-   dfmemSetup(0);
    mpuSetup(1);
    tiHSetup();
-   amsHallSetup();
+   LED_3 = 1;
+
+   // Need delay for encoders to be ready
+   delay_ms(100);
+   amsEncoderSetup();
    cmdSetup();
    pidSetup();
+   uartInit(&cmdPushFunc);
 
    // Radio setup
    radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
    radioSetChannel(RADIO_MY_CHAN);
    radioSetSrcAddr(RADIO_SRC_ADDR);
    radioSetSrcPanID(RADIO_PAN_ID);
-   setupTimer6(RADIO_FCY); // Radio and buffer loop timer
 
-   char j;
-   for(j=0; j<3; j++){
-       LED_2 = ON;
-       delay_ms(5);
-       LED_2 = OFF;
-       delay_ms(5);
-   }
-
-   LED_3 = ON;
-
-   EnableIntT2;
+   LED_3 = 0;
+   LED_1 = 1;
    while(1){
+       // handles sending outgoing packets
+       radioProcess();
+
+       // move received packets to function queue
+        while (!radioRxQueueEmpty())
+        {
+            // Check for unprocessed packet
+            rx_packet = radioDequeueRxPacket();
+            if(rx_packet == NULL) break;
+            cmdPushFunc(rx_packet);
+        }
+
+       // process commands from function queue
        while(!queueIsEmpty(fun_queue))
        {
            test = queuePop(fun_queue);
            rx_payload = macGetPayload(test->packet);
            tf = test->tf;
            (*tf)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload));
-           payDelete(rx_payload);      //Ron's code doesn't do this
            radioReturnPacket(test->packet);
            free(test);
        }
    }
    return 0;
-
 }

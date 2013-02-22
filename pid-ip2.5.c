@@ -19,6 +19,8 @@
 #include "sclock.h"
 #include "ams-enc.h"
 #include "tih.h"
+#include "uart_driver.h"
+
 #include <stdlib.h> // for malloc
 #include "init.h"  // for Timer1
 
@@ -306,7 +308,9 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 { int j;
   LED_3 = 1;
   interrupt_count++;
-  if(interrupt_count == 4) {
+  /*if(interrupt_count == 3) {
+      uartSendPayload(0x42, 0, 0, NULL);
+  } else*/ if(interrupt_count == 4) {
       amsEncoderStartAsyncRead();
   } else if(interrupt_count == 5) {
       interrupt_count = 0;

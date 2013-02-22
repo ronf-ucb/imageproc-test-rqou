@@ -71,9 +71,15 @@ int main() {
 
    LED_3 = 0;
    LED_1 = 1;
+   long count = 1000;
    while(1){
        // handles sending outgoing packets
        radioProcess();
+
+       if(--count == 0) {
+        uartSendPayload(0x42, 0, 0, NULL);
+        count = 4000;
+       }
 
        // move received packets to function queue
         while (!radioRxQueueEmpty())

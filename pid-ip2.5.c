@@ -20,6 +20,7 @@
 #include "ams-enc.h"
 #include "tih.h"
 #include "uart_driver.h"
+#include "ppool.h"
 
 #include <stdlib.h> // for malloc
 #include "init.h"  // for Timer1
@@ -304,30 +305,39 @@ void EmergencyStop(void)
 /* update setpoint  only leg which has run_time + start_time > t1_ticks */
 /* turn off when all PIDs have finished */
 volatile unsigned char interrupt_count = 0;
-void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) 
-{ int j;
-  LED_3 = 1;
-  interrupt_count++;
-  /*if(interrupt_count == 3) {
-      uartSendPayload(0x42, 0, 0, NULL);
-  } else*/ if(interrupt_count == 4) {
-      amsEncoderStartAsyncRead();
-  } else if(interrupt_count == 5) {
-      interrupt_count = 0;
-    if (t1_ticks == T1_MAX) t1_ticks = 0;
-    t1_ticks++;
-    pidGetState();	// always update state, even if motor is coasting
- // only update tracking setpoint if time has not yet expired
-	for (j = 0; j< NUM_PIDS; j++)
-   	{     if (pidObjs[j].onoff)
-		{ pidGetSetpoint(j);  }  // only update setpoint if still in run time
-   	}
+extern volatile MacPacket uart_tx_packet;
+extern volatile unsigned char uart_tx_flag;
 
-	pidSetControl();	// run control even if not updating setpoint to hold position
-    //Clear Timer1 interrupt flag
-        LED_3 = 0;
+void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
+    int j;
+    LED_3 = 1;
+    interrupt_count++;
+    if(interrupt_count == 3 && !uart_tx_flag) {
+        uart_tx_packet = ppoolRequestFullPacket(0);
+        if(uart_tx_packet != NULL) {
+            paySetType(uart_tx_packet->payload, 'P');
+            paySetStatus(uart_tx_packet->payload, ':');
+            paySetData(uart_tx_packet->payload, 0, NULL);
+            uart_tx_flag = 1;
+        }
+    } else if(interrupt_count == 4) {
+        amsEncoderStartAsyncRead();
+    } else if(interrupt_count == 5) {
+        interrupt_count = 0;
+        if (t1_ticks == T1_MAX) t1_ticks = 0;
+        t1_ticks++;
+        pidGetState();	// always update state, even if motor is coasting
+        // only update tracking setpoint if time has not yet expired
+        for (j = 0; j< NUM_PIDS; j++)
+        {     if (pidObjs[j].onoff)
+                { pidGetSetpoint(j);  }  // only update setpoint if still in run time
+        }
+
+        pidSetControl();	// run control even if not updating setpoint to hold position
+        //Clear Timer1 interrupt flag
+    }
+    LED_3 = 0;
     _T1IF = 0;
-	}
 }
 
 // update desired velocity and position tracking setpoints for each leg

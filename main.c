@@ -42,6 +42,9 @@ Payload rx_payload;
 MacPacket rx_packet;
 Test* test;
 
+volatile MacPacket uart_tx_packet;
+volatile unsigned char uart_tx_flag;
+
 int main() {
 
     fun_queue = queueInit(FUN_Q_LEN);
@@ -61,7 +64,9 @@ int main() {
    amsEncoderSetup();
    cmdSetup();
    pidSetup();
-   //uartInit(&cmdPushFunc);
+   uartInit(&cmdPushFunc);
+   uart_tx_packet = NULL;
+   uart_tx_flag = 0;
 
    // Radio setup
    radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
@@ -76,9 +81,14 @@ int main() {
        // handles sending outgoing packets
        radioProcess();
 
-       if(--count == 0) {
+       /*if(--count == 0) {
         uartSendPayload(0x42, 0, 0, NULL);
         count = 4000;
+       }*/
+
+       if(uart_tx_flag) {
+           uartSendPacket(uart_tx_packet);
+           uart_tx_flag = 0;
        }
 
        // move received packets to function queue

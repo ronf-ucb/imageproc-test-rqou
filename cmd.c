@@ -165,10 +165,15 @@ void cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char le
 		vel[i] = frame[idx]+ (frame[idx+1]<<8);
 		if(vel[i]<0){
 			delta[i] = -0x4000;   //hardcoded for now
-		} else {
+			interval[i] = delta[i]/vel[i];
+		} else if(vel[i]>0) {
 			delta[i] = 0x4000;
+			interval[i] = delta[i]/vel[i];
+		} else {
+			delta[i] = 0;
+			interval[i] = 100;	//Fudge factor
 		}
-		interval[i] = delta[i]/vel[i];
+		
 	 	idx+=2; 	
 	 }
 
@@ -178,10 +183,15 @@ void cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char le
 		vel[i] = frame[idx]+ (frame[idx+1]<<8);
 		if(vel[i]<0){
 			delta[i] = -0x4000;   //hardcoded for now
-		} else {
+			interval[i] = delta[i]/vel[i];
+		} else if(vel[i]>0) {
 			delta[i] = 0x4000;
+			interval[i] = delta[i]/vel[i];
+		} else {
+			delta[i] = 0;
+			interval[i] = 100;	//Fudge factor
 		}
-		interval[i] = delta[i]/vel[i];
+		
 	 	idx+=2; 	
 	 }
 	setPIDVelProfile(1, interval, delta, vel);

@@ -61,7 +61,7 @@ if __name__ == '__main__':
                                   dest_addr=DEST_ADDR  )
 
         #Initialization
-
+        ts.SetGains(motorgains)
 
 
         while msvcrt.kbhit():

@@ -19,6 +19,7 @@
 #include "sclock.h"
 #include "ams-enc.h"
 #include "tih.h"
+#include "mpu6000.h"
 #include "uart_driver.h"
 #include "ppool.h"
 
@@ -378,12 +379,12 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
         pidGetState();	// always update state, even if motor is coasting
         // only update tracking setpoint if time has not yet expired
         for (j = 0; j< NUM_PIDS; j++)
-        {     if (pidObjs[j].onoff)
-                { pidGetSetpoint(j);  }  // only update setpoint if still in run time
+        {     if (pidObjs[j].onoff) {
+         		pidGetSetpoint(j);  
+         		} 
         }
-
-        pidSetControl();	// run control even if not updating setpoint to hold position
         //Clear Timer1 interrupt flag
+        pidSetControl();
     }
     LED_3 = 0;
     _T1IF = 0;

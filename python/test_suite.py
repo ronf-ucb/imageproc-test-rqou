@@ -163,15 +163,15 @@ class TestSuite():
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
 
-    def SetGains(self):
+    def SetGains(self,motorgains):
         header = chr(kStatusUnused) + chr(SetPIDGains)
 
         print 'Enter Gains ,<csv> [Kp, Ki, Kd, Kanti-wind, ff]: ',
-        x = raw_input()
-        if len(x):
-            motorgains = map(int,x.split(','))
+        # x = raw_input()
+        # if len(x):
+        #     motorgains = map(int,x.split(','))
 
-        temp = motorgains+motorgains
+        temp = motorgains
         print  'Gains: ' + str(motorgains)
         data_out = header + ''.join(pack("10h",*temp))
         if(self.check_conn()):
@@ -187,10 +187,6 @@ class TestSuite():
         x = raw_input()
         if len(x):
             vel = map(int,x.split(','))
-            for i in range(0,4):
-                if vel[i]<0:
-                    delta[i] = -delta[i]
-                intervals[i] = delta[i]/vel[i]
 
         temp = vel+vel
         print 'Int, Delta, Vel: '+str(temp)

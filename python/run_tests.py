@@ -49,7 +49,8 @@ BS_BAUDRATE = 230400
 
 DEST_ADDR = '\x21\x02'
 
-motorgains = [800,200,400,0,0, 800,200,400,0,0] #TUNE THESE
+motorgains = [800,0,400,0,0,\
+              800,0,400,0,0] #TUNE THESE
 duration = 2000
 
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
                                   dest_addr=DEST_ADDR  )
 
         #Initialization
-        ts.SetGains(motorgains)
+
 
 
         while msvcrt.kbhit():
@@ -72,6 +73,10 @@ if __name__ == '__main__':
 
             if keypress == 'p':
                 ts.PIDStart(duration)
+
+            elif keypress == ' ':
+                ts.PIDSTAHP();
+
             elif keypress == 'm':
                 ts.test_motorop()
 
@@ -81,7 +86,7 @@ if __name__ == '__main__':
                 print 'Current duration '+str(duration)
 
             elif keypress == 'g':
-                ts.SetGains(motorgains)
+                ts.SetGains()
 
             elif keypress == 'i':
                 ts.SetProfile()

@@ -35,6 +35,7 @@ kTestMPUCmd     = 6
 
 SetVelProfile   =   0x8C
 PIDStartMotors  =   0x81
+PIDStopMotors   =   0x8E
 SetPIDGains     =   0x82
 GetAMSPos       =   0x84
 WhoAmI          =   0x8D                    
@@ -162,10 +163,17 @@ class TestSuite():
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
 
-    def SetGains(self, motorgains):
+    def SetGains(self):
         header = chr(kStatusUnused) + chr(SetPIDGains)
+
+        print 'Enter Gains ,<csv> [Kp, Ki, Kd, Kanti-wind, ff]: ',
+        x = raw_input()
+        if len(x):
+            motorgains = map(int,x.split(','))
+
+        temp = motorgains+motorgains
         print  'Gains: ' + str(motorgains)
-        data_out = header + ''.join(pack("10h",*motorgains))
+        data_out = header + ''.join(pack("10h",*temp))
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
@@ -194,8 +202,15 @@ class TestSuite():
             
     def PIDStart(self, duration):
         header = chr(kStatusUnused) + chr(PIDStartMotors)
-        thrust = [0, duration, 0, duration, 0]
-        data_out = header + ''.join(pack("5h",*thrust))
+        #thrust = [0, duration, 0, duration, 0]
+        data_out = header #+ ''.join(pack("5h",*thrust))
+        if(self.check_conn()):
+            self.radio.tx(dest_addr=self.dest_addr, data=data_out)
+            time.sleep(0.2)
+
+    def PIDSTAHP(self):
+        header = chr(kStatusUnused) + chr(PIDStopMotors)
+        data_out = header 
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)

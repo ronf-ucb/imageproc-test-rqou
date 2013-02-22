@@ -39,6 +39,7 @@ static void cmdGetAMSPos(unsigned char type, unsigned char status, unsigned char
 static void cmdSetThrustOpenLoop(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdSetPIDGains(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdPIDStartMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
+static void cmdPIDStopMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 
 /*-----------------------------------------------------------------------------
@@ -56,6 +57,7 @@ void cmdSetup(void) {
     cmd_func[CMD_SET_THRUST_OPENLOOP] = &cmdSetThrustOpenLoop;
     cmd_func[CMD_SET_PID_GAINS] = &cmdSetPIDGains;
     cmd_func[CMD_PID_START_MOTORS] = &cmdPIDStartMotors;
+    cmd_func[CMD_PID_STOP_MOTORS] = &cmdPIDStopMotors;
     cmd_func[CMD_SET_VEL_PROFILE] = &cmdSetVelProfile;
     cmd_func[CMD_WHO_AM_I] = &cmdWhoAmI;
     cmd_func[CMD_GET_AMS_POS] = &cmdGetAMSPos;
@@ -187,17 +189,19 @@ void cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char le
 }
 
 void cmdPIDStartMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame)
-{	int thrust1 = frame[0] + (frame[1] << 8);
-	unsigned int run_time_ms1 = frame[2] + (frame[3] << 8);
-	int thrust2 = frame[4] + (frame[5] << 8);
-	unsigned int run_time_ms2 = frame[6] + (frame[7] << 8);
-	//currentMove = manualMove;
-	pidSetInput(0 ,thrust1, run_time_ms1);
+{
+	LED_2 = ~LED_2;
+	pidSetInput(0, 0);
 	pidOn(0);
-	pidSetInput(1 ,thrust2, run_time_ms2);
+	pidSetInput(1, 0);
 	pidOn(1);
 }
 
+void cmdPIDStopMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame)
+{
+	pidObjs[0].onoff = 0;
+	pidObjs[1].onoff = 0;
+}
 
 void cmdError()
 { int i;

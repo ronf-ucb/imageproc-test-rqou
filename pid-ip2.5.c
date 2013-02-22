@@ -77,12 +77,12 @@ void pidSetup()
 
 	lastMoveTime = 0;
 //  initialize PID structures before starting Timer1
-	pidSetInput(0,0,0);
-	pidSetInput(1,0,0);
+	pidSetInput(0,0);
+	pidSetInput(1,0);
 	
 	EnableIntT1; // turn on pid interrupts
 
-	calibBatteryOffset(100); //???This is broken for 2.5
+	//calibBatteryOffset(100); //???This is broken for 2.5
 }
 
 
@@ -165,12 +165,11 @@ void initPIDObj(pidT *pid, int Kp, int Ki, int Kd, int Kaw, int ff)
 
 
 // called from set thrust closed loop, etc. Thrust 
-void pidSetInput(int pid_num, int input_val, unsigned int run_time){
+void pidSetInput(int pid_num, int input_val){
 unsigned long temp;	
 /*      ******   use velocity setpoint + throttle for compatibility between Hall and Pullin code *****/
 /* otherwise, miss first velocity set point */
     pidObjs[pid_num].v_input = input_val + (int)(( (long)pidVel[pid_num].vel[0] * K_EMF) >> 8);	//initialize first velocity ;
-    pidObjs[pid_num].run_time = run_time;
     pidObjs[pid_num].start_time = t1_ticks;
     //zero out running PID values
     pidObjs[pid_num].i_error = 0;
@@ -180,14 +179,11 @@ unsigned long temp;
 	//Seed the median filter
 	measLast1[pid_num] =input_val;
 	measLast2[pid_num] =input_val;
-	temp = t1_ticks;  // need atomic read due to interrupt 
-
-	if ((temp + (unsigned long) run_time) > lastMoveTime)
-	{ lastMoveTime = temp + (unsigned long) run_time; }  // set run time to max requested time
 
 // set initial time for next move set point 
 /*   need to set index =0 initial values */
 /* position setpoints start at 0 (index=0), then interpolate until setpoint 1 (index =1), etc */
+	temp = 0;
 	pidVel[pid_num].expire = temp + (long) pidVel[pid_num].interval[0];   // end of first interval
 	pidVel[pid_num].interpolate = 0;	
 /*	pidObjs[pid_num].p_input += pidVel[pid_num].delta[0];	//update to first set point
@@ -220,6 +216,7 @@ void pidSetGains(int pid_num, int Kp, int Ki, int Kd, int Kaw, int ff){
 
 void pidOn(int pid_num){
 	pidObjs[pid_num].onoff = 1;
+	t1_ticks = 0;
 }
 
 // zero position setpoint for both motors (avoids big offset errors)
@@ -288,8 +285,8 @@ void calibBatteryOffset(int spindown_ms){
 /*****************************************************************************************/
 void EmergencyStop(void)
 {
-	pidSetInput(0 ,0, 0);
-	pidSetInput(1,0,0);
+	pidSetInput(0, 0);
+	pidSetInput(1, 0);
 	DisableIntT1; // turn off pid interrupts
        SetDCMCPWM(MC_CHANNEL_PWM1, 0, 0);    // set PWM to zero
        SetDCMCPWM(MC_CHANNEL_PWM2, 0, 0); 
@@ -311,14 +308,9 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
     pidGetState();	// always update state, even if motor is coasting
  // only update tracking setpoint if time has not yet expired
 	for (j = 0; j< NUM_PIDS; j++)
-   	{     if ((pidObjs[j].start_time + pidObjs[j].run_time) >=  t1_ticks)
+   	{     if (pidObjs[j].onoff)
 		{ pidGetSetpoint(j);  }  // only update setpoint if still in run time
    	}
-
-	if(t1_ticks > lastMoveTime) // turn off if done running all legs
-   	{	pidObjs[0].onoff = 0;
-		pidObjs[1].onoff = 0;
-   	}  
 
 	pidSetControl();	// run control even if not updating setpoint to hold position
     //Clear Timer1 interrupt flag

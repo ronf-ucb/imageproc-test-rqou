@@ -66,8 +66,6 @@ int measLast1[NUM_PIDS];
 int measLast2[NUM_PIDS];
 int bemf[NUM_PIDS]; //used to store the true, unfiltered speed
 
-
-
 // -------------------------------------------
 // called from main()
 void pidSetup()
@@ -251,8 +249,8 @@ void telemGetPID()
 	CRITICAL_SECTION_END
 
 		mpuBeginUpdate();
-		mpuGetGyro(&gdata);
-		mpuGetXl(&xldata);
+		mpuGetGyro(gdata);
+		mpuGetXl(xldata);
 
    		telemPIDdata.telemStruct.gyroX = gdata[0];
 		telemPIDdata.telemStruct.gyroY = gdata[1];
@@ -351,7 +349,8 @@ void EmergencyStop(void)
 
 /* update setpoint  only leg which has run_time + start_time > t1_ticks */
 /* turn off when all PIDs have finished */
-volatile unsigned char interrupt_count = 0;
+static volatile unsigned char interrupt_count = 0;
+static volatile unsigned char telemetry_count = 0;
 extern volatile MacPacket uart_tx_packet;
 extern volatile unsigned char uart_tx_flag;
 
@@ -359,21 +358,27 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
     int j;
     LED_3 = 1;
     interrupt_count++;
-    if(interrupt_count == 3 && !uart_tx_flag) {
-        telemGetPID();
-        uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
-        if(uart_tx_packet != NULL) {
-        	//time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
-        	//bytes: 4,4,4,4,4,2,2,2,2,2,2,2,2,2,2
-            paySetType(uart_tx_packet->payload, 'CMD_PID_TELEMETRY');
-            paySetStatus(uart_tx_packet->payload, ':');
-            paySetData(uart_tx_packet->payload, sizeof(telemStruct_t), (unsigned char *) &telemPIDdata);
-            uart_tx_flag = 1;
-        }
-    } else if(interrupt_count == 4) {
-        amsEncoderStartAsyncRead();
-    } else if(interrupt_count == 5) {
+    if(interrupt_count == 5) {
         interrupt_count = 0;
+        telemetry_count++;
+        if(telemetry_count == 5) {
+            telemetry_count = 0;
+            if(!uart_tx_flag) {
+                telemGetPID();
+                /*uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
+                if(uart_tx_packet != NULL) {
+                        //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
+                        //bytes: 4,4,4,4,4,2,2,2,2,2,2,2,2,2,2
+                    paySetType(uart_tx_packet->payload, CMD_PID_TELEMETRY);
+                    paySetStatus(uart_tx_packet->payload, 0);
+                    paySetData(uart_tx_packet->payload, sizeof(telemStruct_t), (unsigned char *) &telemPIDdata);
+                    uart_tx_flag = 1;
+                }*/
+            }
+        }
+    } else if(interrupt_count == 3) {
+        amsEncoderStartAsyncRead();
+    } else if(interrupt_count == 4) {
         if (t1_ticks == T1_MAX) t1_ticks = 0;
         t1_ticks++;
         pidGetState();	// always update state, even if motor is coasting

@@ -43,16 +43,8 @@ static Payload rx_payload;
 static MacPacket rx_packet;
 static test_function rx_function;
 
-static volatile MacPacket uart_tx_packet;
-static volatile unsigned char uart_tx_flag;
-
-//static unsigned char uart_rx_flag;
-//static MacPacket uart_rx_packet;
-
-/*static void uartCallback(MacPacket packet) {
-    LED_2 = ~LED_2;
-    ppoolReturnFullPacket(packet);
-}*/
+volatile MacPacket uart_tx_packet;
+volatile unsigned char uart_tx_flag;
 
 volatile CircArray fun_queue;
 
@@ -64,30 +56,29 @@ int main() {
     SetupPorts();
     sclockSetup();
 
-    // Peripheral Initialization
-    //fun_queue = queueInit(FUN_Q_LEN);
-    fun_queue = carrayCreate(FUN_Q_LEN);
-    mpuSetup(1);
-    tiHSetup();
     LED_3 = 1;
 
-    // Need delay for encoders to be ready
-    delay_ms(100);
-    amsEncoderSetup();
+    // Message Passing
+    fun_queue = carrayCreate(FUN_Q_LEN);
     cmdSetup();
-    pidSetup();
-
-    uartInit(&cmdPushFunc);
-    //uartInit(&uartCallback);
-
-    uart_tx_packet = NULL;
-    uart_tx_flag = 0;
 
     // Radio setup
     radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
     radioSetChannel(RADIO_MY_CHAN);
     radioSetSrcAddr(RADIO_SRC_ADDR);
     radioSetSrcPanID(RADIO_PAN_ID);
+
+    uart_tx_packet = NULL;
+    uart_tx_flag = 0;
+    uartInit(&cmdPushFunc);
+
+    // Need delay for encoders to be ready
+    delay_ms(100);
+    amsEncoderSetup();
+    mpuSetup(1);
+    tiHSetup();
+
+    pidSetup();
 
     LED_3 = 0;
     LED_1 = 1;

@@ -312,7 +312,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
     int j;
     LED_3 = 1;
     interrupt_count++;
-    if(interrupt_count == 3 && !uart_tx_flag) {
+    /*if(interrupt_count == 3 && !uart_tx_flag) {
         uart_tx_packet = ppoolRequestFullPacket(0);
         if(uart_tx_packet != NULL) {
             paySetType(uart_tx_packet->payload, 'P');
@@ -320,7 +320,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
             paySetData(uart_tx_packet->payload, 0, NULL);
             uart_tx_flag = 1;
         }
-    } else if(interrupt_count == 4) {
+    } else*/ if(interrupt_count == 4) {
         amsEncoderStartAsyncRead();
     } else if(interrupt_count == 5) {
         interrupt_count = 0;

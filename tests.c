@@ -60,8 +60,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "radio_settings.h"
-
-volatile Queue fun_queue;
+#include "carray.h"
 
 /*****************************************************************************
 * Function Name : test_radio

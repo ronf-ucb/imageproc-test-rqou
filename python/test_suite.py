@@ -174,6 +174,7 @@ class TestSuite():
         temp = motorgains+motorgains
         print  'Gains: ' + str(motorgains)
         data_out = header + ''.join(pack("10h",*temp))
+        print data_out.encode('hex')
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
@@ -195,7 +196,7 @@ class TestSuite():
         print 'Int, Delta, Vel: '+str(temp)
         temp = temp+temp 
         data_out = header + ''.join(pack("24h",*temp))
-
+        print data_out.encode('hex')
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
@@ -204,6 +205,7 @@ class TestSuite():
         header = chr(kStatusUnused) + chr(PIDStartMotors)
         #thrust = [0, duration, 0, duration, 0]
         data_out = header #+ ''.join(pack("5h",*thrust))
+        print header.encode('hex')
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)

@@ -20,7 +20,6 @@
 #include "init_default.h"
 #include "timer.h"
 #include "utils.h"
-#include "queue.h"
 #include "radio.h"
 #include "tih.h"
 #include "ams-enc.h"
@@ -35,57 +34,68 @@
 #include "pid-ip2.5.h"
 #include "cmd.h"
 #include "uart_driver.h"
+#include "ppool.h"
+#include "carray.h"
 
 #include <stdlib.h>
 
-Payload rx_payload;
-MacPacket rx_packet;
-Test* test;
+static Payload rx_payload;
+static MacPacket rx_packet;
+static test_function rx_function;
 
-volatile MacPacket uart_tx_packet;
-volatile unsigned char uart_tx_flag;
+static volatile MacPacket uart_tx_packet;
+static volatile unsigned char uart_tx_flag;
+
+//static unsigned char uart_rx_flag;
+//static MacPacket uart_rx_packet;
+
+/*static void uartCallback(MacPacket packet) {
+    LED_2 = ~LED_2;
+    ppoolReturnFullPacket(packet);
+}*/
+
+volatile CircArray fun_queue;
 
 int main() {
 
-    fun_queue = queueInit(FUN_Q_LEN);
-    test_function tf;
-    
-    /* Initialization */
-   SetupClock();
-   SwitchClocks();
-   SetupPorts();
-   sclockSetup();
-   mpuSetup(1);
-   tiHSetup();
-   LED_3 = 1;
+    // Processor Initialization
+    SetupClock();
+    SwitchClocks();
+    SetupPorts();
+    sclockSetup();
 
-   // Need delay for encoders to be ready
-   delay_ms(100);
-   amsEncoderSetup();
-   cmdSetup();
-   pidSetup();
-   uartInit(&cmdPushFunc);
-   uart_tx_packet = NULL;
-   uart_tx_flag = 0;
+    // Peripheral Initialization
+    //fun_queue = queueInit(FUN_Q_LEN);
+    fun_queue = carrayCreate(FUN_Q_LEN);
+    mpuSetup(1);
+    tiHSetup();
+    LED_3 = 1;
 
-   // Radio setup
-   radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
-   radioSetChannel(RADIO_MY_CHAN);
-   radioSetSrcAddr(RADIO_SRC_ADDR);
-   radioSetSrcPanID(RADIO_PAN_ID);
+    // Need delay for encoders to be ready
+    delay_ms(100);
+    amsEncoderSetup();
+    cmdSetup();
+    pidSetup();
 
-   LED_3 = 0;
-   LED_1 = 1;
-   long count = 1000;
-   while(1){
-       // handles sending outgoing packets
+    uartInit(&cmdPushFunc);
+    //uartInit(&uartCallback);
+
+    uart_tx_packet = NULL;
+    uart_tx_flag = 0;
+
+    // Radio setup
+    radioInit(RADIO_RXPQ_MAX_SIZE, RADIO_TXPQ_MAX_SIZE, 0);
+    radioSetChannel(RADIO_MY_CHAN);
+    radioSetSrcAddr(RADIO_SRC_ADDR);
+    radioSetSrcPanID(RADIO_PAN_ID);
+
+    LED_3 = 0;
+    LED_1 = 1;
+    while(1){
+       // Send outgoing radio packets
        radioProcess();
 
-       /*if(--count == 0) {
-        uartSendPayload(0x42, 0, 0, NULL);
-        count = 4000;
-       }*/
-
+       // Send outgoing uart packets
        if(uart_tx_flag) {
            uartSendPacket(uart_tx_packet);
            uart_tx_flag = 0;
@@ -96,20 +106,27 @@ int main() {
         {
             // Check for unprocessed packet
             rx_packet = radioDequeueRxPacket();
-            if(rx_packet == NULL) break;
-            cmdPushFunc(rx_packet);
+            if(rx_packet != NULL) {
+                cmdPushFunc(rx_packet);
+            }
         }
 
        // process commands from function queue
-       while(!queueIsEmpty(fun_queue))
+       while(!carrayIsEmpty(fun_queue))
        {
-           test = queuePop(fun_queue);
-           rx_payload = macGetPayload(test->packet);
-           tf = test->tf;
-           (*tf)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload));
-           radioReturnPacket(test->packet);
-           free(test);
+           rx_packet = carrayPopHead(fun_queue);
+           if(rx_packet != NULL) {
+               rx_payload = macGetPayload(rx_packet);
+               if(rx_payload != NULL) {
+                   rx_function = (test_function)(rx_payload->test);
+                   if(rx_function != NULL) {
+                       LED_2 = ~LED_2;
+                       (rx_function)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload));
+                   }
+               }
+               ppoolReturnFullPacket(rx_packet);
+           }
        }
-   }
-   return 0;
+    }
+    return 0;
 }

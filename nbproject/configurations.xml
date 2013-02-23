@@ -52,7 +52,6 @@
       <itemPath>consts.h</itemPath>
       <itemPath>init.h</itemPath>
       <itemPath>interrupts.h</itemPath>
-      <itemPath>p33FJ128MC706.h</itemPath>
       <itemPath>radio_settings.h</itemPath>
       <itemPath>tests.h</itemPath>
       <itemPath>led.h</itemPath>

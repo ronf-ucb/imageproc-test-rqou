@@ -57,6 +57,7 @@ void cmdSetup(void) {
         cmd_func[i] = &cmdNop;
     }
     cmd_func[CMD_TEST_RADIO] = &test_radio;
+    cmd_func[CMD_TEST_MPU] = &test_mpu;
     cmd_func[CMD_SET_THRUST_OPENLOOP] = &cmdSetThrustOpenLoop;
     cmd_func[CMD_SET_PID_GAINS] = &cmdSetPIDGains;
     cmd_func[CMD_PID_START_MOTORS] = &cmdPIDStartMotors;
@@ -161,30 +162,36 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
     int idx = 0, i = 0;
 
     for(i = 0; i < NUM_VELS; i ++) {
-        interval[i] = frame[idx]+ (frame[idx+1]<<8);
-        idx+=2;
-    }
-    for(i = 0; i < NUM_VELS; i ++) {
-        delta[i] = frame[idx]+ (frame[idx+1]<<8);
-        idx+=2;
-    }
-    for(i = 0; i < NUM_VELS; i ++) {
         vel[i] = frame[idx]+ (frame[idx+1]<<8);
+		if(vel[i]<0){
+			delta[i] = -0x4000;   //hardcoded for now
+			interval[i] = delta[i]/vel[i];
+		} else if(vel[i]>0) {
+			delta[i] = 0x4000;
+			interval[i] = delta[i]/vel[i];
+		} else {
+			delta[i] = 0;
+			interval[i] = 100;	//Fudge factor
+		}
+		
         idx+=2;
     }
 
     setPIDVelProfile(0, interval, delta, vel);
 
     for(i = 0; i < NUM_VELS; i ++) {
-        interval[i] = frame[idx]+ (frame[idx+1]<<8);
-        idx+=2;
-    }
-    for(i = 0; i < NUM_VELS; i ++) {
-        delta[i] = frame[idx]+ (frame[idx+1]<<8);
-        idx+=2;
-    }
-    for(i = 0; i < NUM_VELS; i ++) {
         vel[i] = frame[idx]+ (frame[idx+1]<<8);
+		if(vel[i]<0){
+			delta[i] = -0x4000;   //hardcoded for now
+			interval[i] = delta[i]/vel[i];
+		} else if(vel[i]>0) {
+			delta[i] = 0x4000;
+			interval[i] = delta[i]/vel[i];
+		} else {
+			delta[i] = 0;
+			interval[i] = 100;	//Fudge factor
+		}
+		
         idx+=2;
     }
     setPIDVelProfile(1, interval, delta, vel);

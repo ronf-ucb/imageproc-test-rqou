@@ -163,18 +163,17 @@ class TestSuite():
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
 
-    def SetGains(self):
+    def SetGains(self,motorgains):
         header = chr(kStatusUnused) + chr(SetPIDGains)
 
         print 'Enter Gains ,<csv> [Kp, Ki, Kd, Kanti-wind, ff]: ',
-        x = raw_input()
-        if len(x):
-            motorgains = map(int,x.split(','))
+        # x = raw_input()
+        # if len(x):
+        #     motorgains = map(int,x.split(','))
 
-        temp = motorgains+motorgains
+        temp = motorgains
         print  'Gains: ' + str(motorgains)
         data_out = header + ''.join(pack("10h",*temp))
-        print data_out.encode('hex')
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
@@ -182,21 +181,17 @@ class TestSuite():
     def SetProfile(self):
         header = chr(kStatusUnused) + chr(SetVelProfile)
         delta = [0x4000,0x4000,0x4000,0x4000]
-        vel = [128, 64,64,128]
+        intervals = [128, 128, 128, 128]
         
-        print 'Enter intervals <csv>: ',
+        print 'Enter vels <csv>: ',
         x = raw_input()
         if len(x):
-            intervals = map(int,x.split(','))
-            for i in range(0,4):
-                intervals[i] = intervals[i]  # interval in ms
-                vel[i] = (delta[i])/intervals[i]
+            vel = map(int,x.split(','))
 
-        temp = intervals+delta+vel
+        temp = vel+vel
         print 'Int, Delta, Vel: '+str(temp)
-        temp = temp+temp 
-        data_out = header + ''.join(pack("24h",*temp))
-        print data_out.encode('hex')
+        data_out = header + ''.join(pack("8h",*temp))
+
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)
@@ -205,7 +200,6 @@ class TestSuite():
         header = chr(kStatusUnused) + chr(PIDStartMotors)
         #thrust = [0, duration, 0, duration, 0]
         data_out = header #+ ''.join(pack("5h",*thrust))
-        print header.encode('hex')
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)
             time.sleep(0.2)

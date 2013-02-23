@@ -61,7 +61,7 @@ if __name__ == '__main__':
                                   dest_addr=DEST_ADDR  )
 
         #Initialization
-
+        ts.SetGains(motorgains)
 
 
         while msvcrt.kbhit():
@@ -79,6 +79,9 @@ if __name__ == '__main__':
 
             elif keypress == 'm':
                 ts.test_motorop()
+
+            elif keypress == 'w':
+                ts.test_mpu()
 
             elif keypress == 't':
                 print 'Current duration '+str(duration)+', New duration in ms:',

@@ -357,23 +357,29 @@ extern volatile unsigned char uart_tx_flag;
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
     int j;
     LED_3 = 1;
+    unsigned long timestamp;
     interrupt_count++;
     if(interrupt_count == 5) {
         interrupt_count = 0;
         telemetry_count++;
-        if(telemetry_count == 5) {
+        if(telemetry_count == 1) {
             telemetry_count = 0;
-            if(!uart_tx_flag) {
-                telemGetPID();
-                /*uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
+            if(pidObjs[0].onoff && !uart_tx_flag) {
+                //telemGetPID();
+                uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
+                //uart_tx_packet = ppoolRequestFullPacket(0);
                 if(uart_tx_packet != NULL) {
-                        //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
-                        //bytes: 4,4,4,4,4,2,2,2,2,2,2,2,2,2,2
-                    paySetType(uart_tx_packet->payload, CMD_PID_TELEMETRY);
+                    //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
+                    //bytes: 4,4,4,4,4,2,2,2,2,2,2,2,2,2,2
+                    /*paySetType(uart_tx_packet->payload, CMD_PID_TELEMETRY);
                     paySetStatus(uart_tx_packet->payload, 0);
-                    paySetData(uart_tx_packet->payload, sizeof(telemStruct_t), (unsigned char *) &telemPIDdata);
+                    paySetData(uart_tx_packet->payload, sizeof(telemStruct_t), (unsigned char *) &telemPIDdata);*/
+                    *((unsigned long*)(uart_tx_packet->payload->pld_data)) = sclockGetTime();
+                    for(j=4; j<sizeof(telemStruct_t)+2; j++) {
+                        uart_tx_packet->payload->pld_data[j] = j-4;
+                    }
                     uart_tx_flag = 1;
-                }*/
+                }
             }
         }
     } else if(interrupt_count == 3) {

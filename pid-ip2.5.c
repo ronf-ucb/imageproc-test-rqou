@@ -225,8 +225,6 @@ int xldata[3];  // accelerometer data
 
 // structure to keep track of telemetry recording
 
-extern pidT steeringPID;
-extern pidPos pidObjs[NUM_PIDS];
 extern int bemf[NUM_PIDS];
 
 telemU telemPIDdata;
@@ -241,6 +239,8 @@ void telemGetPID()
 //  save Hall encoder position instead of commanded thrust
 		telemPIDdata.telemStruct.posL = pidObjs[0].p_state;
 		telemPIDdata.telemStruct.posR = pidObjs[1].p_state;
+		telemPIDdata.telemStruct.composL = pidObjs[0].p_input;
+		telemPIDdata.telemStruct.composR = pidObjs[1].p_input;
 	// save output instead of reading PWM (sync issue?)
 		telemPIDdata.telemStruct.dcL = pidObjs[0].output;	// left
 		telemPIDdata.telemStruct.dcR = pidObjs[1].output;	// right

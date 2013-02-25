@@ -94,7 +94,6 @@ typedef struct {
 		int bemfL;
 		int bemfR;
 		int Vbatt; // battery voltage
-		int sOut;	
 	} telemStruct_t;
 
 typedef union packedTelemUnion {

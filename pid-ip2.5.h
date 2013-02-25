@@ -83,6 +83,8 @@ typedef struct {
 	    unsigned long timeStamp; 
 		long posL;  	// Hall angle position
 		long posR;
+		long composL;  	// Commanded Hall angle position
+		long composR;
 		int dcL;		// PWM duty cycle
 		int dcR;
 		int gyroX;

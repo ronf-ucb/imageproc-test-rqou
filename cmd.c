@@ -65,6 +65,7 @@ void cmdSetup(void) {
     cmd_func[CMD_SET_VEL_PROFILE] = &cmdSetVelProfile;
     cmd_func[CMD_WHO_AM_I] = &cmdWhoAmI;
     cmd_func[CMD_GET_AMS_POS] = &cmdGetAMSPos;
+    cmd_func[CMD_ZERO_POS] = &cmdZeroPos;
 
 }
 
@@ -214,6 +215,16 @@ unsigned char cmdPIDStopMotors(unsigned char type, unsigned char status, unsigne
     pidObjs[0].onoff = 0;
     pidObjs[1].onoff = 0;
     return 1;
+}
+
+void cmdZeroPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) 
+{ 	long motor_count[2]; 
+	motor_count[0] = pidObjs[0].p_state;
+	motor_count[1] = pidObjs[1].p_state;
+
+	radioConfirmationPacket(RADIO_DEST_ADDR, CMD_ZERO_POS,\
+		 status, sizeof(motor_count), (unsigned char *)motor_count);  
+     pidZeroPos(0); pidZeroPos(1);
 }
 
 void cmdError() {

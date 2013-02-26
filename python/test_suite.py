@@ -39,6 +39,7 @@ PIDStopMotors   =   0x8E
 SetPIDGains     =   0x82
 GetAMSPos       =   0x84
 WhoAmI          =   0x8D                    
+zeroPos         =   0x8F                    
 
 #kImWidth = 160
 #kImHeight = 100
@@ -206,6 +207,12 @@ class TestSuite():
 
     def PIDSTAHP(self):
         header = chr(kStatusUnused) + chr(PIDStopMotors)
+        data_out = header 
+        if(self.check_conn()):
+            self.radio.tx(dest_addr=self.dest_addr, data=data_out)
+            time.sleep(0.2)
+    def zeroPos(self):
+        header = chr(kStatusUnused) + chr(zeroPos)
         data_out = header 
         if(self.check_conn()):
             self.radio.tx(dest_addr=self.dest_addr, data=data_out)

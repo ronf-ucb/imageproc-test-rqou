@@ -64,7 +64,7 @@ int main() {
    amsEncoderSetup();
    cmdSetup();
    pidSetup();
-   uartInit(&cmdPushFunc);
+   //uartInit(&cmdPushFunc);
    uart_tx_packet = NULL;
    uart_tx_flag = 0;
 
@@ -74,7 +74,7 @@ int main() {
    radioSetSrcAddr(RADIO_SRC_ADDR);
    radioSetSrcPanID(RADIO_PAN_ID);
 
-   LED_3 = 0;
+   LED_3 = 1;
    LED_1 = 1;
    long count = 1000;
    while(1){

@@ -49,8 +49,8 @@ BS_BAUDRATE = 230400
 
 DEST_ADDR = '\x21\x02'
 
-motorgains = [800,0,400,0,0,\
-              800,0,400,0,0] #TUNE THESE
+motorgains = [1800,0,400,0,0,\
+              1800,0,400,0,0] #TUNE THESE
 duration = 2000
 
 
@@ -79,6 +79,9 @@ if __name__ == '__main__':
 
             elif keypress == 'm':
                 ts.test_motorop()
+
+            elif keypress == 'z':
+                ts.zeroPos()
 
             elif keypress == 'w':
                 ts.test_mpu()

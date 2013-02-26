@@ -44,6 +44,7 @@ static unsigned char cmdSetPIDGains(unsigned char type, unsigned char status, un
 static unsigned char cmdPIDStartMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static unsigned char cmdPIDStopMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
+static unsigned char cmdZeroPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 
 /*-----------------------------------------------------------------------------
  *          Public functions
@@ -217,14 +218,15 @@ unsigned char cmdPIDStopMotors(unsigned char type, unsigned char status, unsigne
     return 1;
 }
 
-void cmdZeroPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) 
-{ 	long motor_count[2]; 
-	motor_count[0] = pidObjs[0].p_state;
-	motor_count[1] = pidObjs[1].p_state;
+unsigned char cmdZeroPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
+    long motor_count[2];
+    motor_count[0] = pidObjs[0].p_state;
+    motor_count[1] = pidObjs[1].p_state;
 
-	radioConfirmationPacket(RADIO_DEST_ADDR, CMD_ZERO_POS,\
-		 status, sizeof(motor_count), (unsigned char *)motor_count);  
-     pidZeroPos(0); pidZeroPos(1);
+    radioSendData(RADIO_DEST_ADDR, status, CMD_GET_AMS_POS,
+        sizeof(motor_count), (unsigned char *)motor_count, 0);
+    pidZeroPos(0); pidZeroPos(1);
+    return 1;
 }
 
 void cmdError() {

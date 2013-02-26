@@ -227,39 +227,32 @@ int xldata[3];  // accelerometer data
 
 extern int bemf[NUM_PIDS];
 
-telemU telemPIDdata;
+volatile telemU telemPIDdata;
 
 // store current PID info into structure. Used by telemSaveSample and CmdGetPIDTelemetry
-void telemGetPID()
-{
-	telemPIDdata.telemStruct.timeStamp = (long)sclockGetTime(); 
+void telemGetPID() {
+    telemPIDdata.telemStruct.timeStamp = (long)sclockGetTime();
 
-// since T1 has higher priority, these state readings might get interrupted 
-	CRITICAL_SECTION_START  // need coherent sample without T1 int updates
-//  save Hall encoder position instead of commanded thrust
-		telemPIDdata.telemStruct.posL = pidObjs[0].p_state;
-		telemPIDdata.telemStruct.posR = pidObjs[1].p_state;
-		telemPIDdata.telemStruct.composL = pidObjs[0].p_input;
-		telemPIDdata.telemStruct.composR = pidObjs[1].p_input;
-	// save output instead of reading PWM (sync issue?)
-		telemPIDdata.telemStruct.dcL = pidObjs[0].output;	// left
-		telemPIDdata.telemStruct.dcR = pidObjs[1].output;	// right
-		telemPIDdata.telemStruct.bemfL = bemf[0];
-		telemPIDdata.telemStruct.bemfR = bemf[1];
-	CRITICAL_SECTION_END
+    telemPIDdata.telemStruct.posL = pidObjs[0].p_state;
+    telemPIDdata.telemStruct.posR = pidObjs[1].p_state;
+    telemPIDdata.telemStruct.composL = pidObjs[0].p_input;
+    telemPIDdata.telemStruct.composR = pidObjs[1].p_input;
+    telemPIDdata.telemStruct.dcL = pidObjs[0].output;	// left
+    telemPIDdata.telemStruct.dcR = pidObjs[1].output;	// right
+    telemPIDdata.telemStruct.bemfL = bemf[0];
+    telemPIDdata.telemStruct.bemfR = bemf[1];
 
-		mpuBeginUpdate();
-		mpuGetGyro(gdata);
-		mpuGetXl(xldata);
+    mpuGetGyro(gdata);
+    mpuGetXl(xldata);
 
-   		telemPIDdata.telemStruct.gyroX = gdata[0];
-		telemPIDdata.telemStruct.gyroY = gdata[1];
-		telemPIDdata.telemStruct.gyroZ = gdata[2]; 
-		telemPIDdata.telemStruct.accelX = xldata[0];
-		telemPIDdata.telemStruct.accelY = xldata[1];
-		telemPIDdata.telemStruct.accelZ = xldata[2];
-		telemPIDdata.telemStruct.Vbatt = (int) adcGetVbatt();
-		return;
+    telemPIDdata.telemStruct.gyroX = gdata[0];
+    telemPIDdata.telemStruct.gyroY = gdata[1];
+    telemPIDdata.telemStruct.gyroZ = gdata[2];
+    telemPIDdata.telemStruct.accelX = xldata[0];
+    telemPIDdata.telemStruct.accelY = xldata[1];
+    telemPIDdata.telemStruct.accelZ = xldata[2];
+    telemPIDdata.telemStruct.Vbatt = (int) adcGetVbatt();
+    return;
 }
 
 void pidOn(int pid_num){
@@ -358,7 +351,9 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
     int j;
     LED_3 = 1;
     interrupt_count++;
-    if(interrupt_count == 3) {
+
+    if(interrupt_count == 4) {
+        mpuBeginUpdate();
         amsEncoderStartAsyncRead();
     } else if(interrupt_count == 5) {
         interrupt_count = 0;
@@ -376,6 +371,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
 
         if(pidObjs[0].onoff && !uart_tx_flag) {
             telemGetPID();
+
             uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
             if(uart_tx_packet != NULL) {
                 //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
@@ -383,10 +379,6 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
                 paySetType(uart_tx_packet->payload, CMD_PID_TELEMETRY);
                 paySetStatus(uart_tx_packet->payload, 0);
                 paySetData(uart_tx_packet->payload, sizeof(telemStruct_t), (unsigned char *) &telemPIDdata);
-                /* *((unsigned long*)(uart_tx_packet->payload->pld_data)) = sclockGetTime();
-                for(j=4; j<sizeof(telemStruct_t)+2; j++) {
-                    uart_tx_packet->payload->pld_data[j] = j-4;
-                }*/
                 uart_tx_flag = 1;
             }
         }

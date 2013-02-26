@@ -83,18 +83,18 @@ int main() {
     LED_3 = 0;
     LED_1 = 1;
     while(1){
-       // Send outgoing radio packets
-       radioProcess();
+        // Send outgoing radio packets
+        radioProcess();
 
-       // Send outgoing uart packets
-       if(uart_tx_flag) {
-           uartSendPacket(uart_tx_packet);
-           uart_tx_flag = 0;
-       }
+        // Send outgoing uart packets
+        if(uart_tx_flag) {
+            uartSendPacket(uart_tx_packet);
+            uart_tx_flag = 0;
+        }
 
-       // move received packets to function queue
-        while (!radioRxQueueEmpty())
-        {
+
+        // move received packets to function queue
+        while (!radioRxQueueEmpty()) {
             // Check for unprocessed packet
             rx_packet = radioDequeueRxPacket();
             if(rx_packet != NULL) {
@@ -102,11 +102,10 @@ int main() {
             }
         }
 
-       // process commands from function queue
-       while(!carrayIsEmpty(fun_queue))
-       {
-           rx_packet = carrayPopHead(fun_queue);
-           if(rx_packet != NULL) {
+        // process commands from function queue
+        while(!carrayIsEmpty(fun_queue)) {
+            rx_packet = carrayPopHead(fun_queue);
+            if(rx_packet != NULL) {
                rx_payload = macGetPayload(rx_packet);
                if(rx_payload != NULL) {
                    rx_function = (test_function)(rx_payload->test);
@@ -116,8 +115,8 @@ int main() {
                    }
                }
                ppoolReturnFullPacket(rx_packet);
-           }
-       }
+            }
+        }
     }
     return 0;
 }

@@ -80,27 +80,28 @@ typedef struct
 
 //============================Telemetry====================================
 typedef struct {
-	    unsigned long timeStamp; 
-		long posL;  	// Hall angle position
-		long posR;
-		long composL;  	// Commanded Hall angle position
-		long composR;
-		int dcL;		// PWM duty cycle
-		int dcR;
-		int gyroX;
-		int gyroY;
-		int gyroZ;
-		int accelX;
-		int accelY;
-		int accelZ;
-		int bemfL;
-		int bemfR;
-		int Vbatt; // battery voltage
-	} telemStruct_t;
+    unsigned long timeStamp;
+    long posL;  	// Hall angle position
+    long posR;
+    long composL;  	// Commanded Hall angle position
+    long composR;
+    int dcL;		// PWM duty cycle
+    int dcR;
+    int gyroX;
+    int gyroY;
+    int gyroZ;
+    int accelX;
+    int accelY;
+    int accelZ;
+    int bemfL;
+    int bemfR;
+    int Vbatt; // battery voltage
+    int sync;
+} telemStruct_t;
 
 typedef union packedTelemUnion {
-	telemStruct_t telemStruct;
-	unsigned char dataArray[sizeof(telemStruct_t)];
+    telemStruct_t telemStruct;
+    unsigned char dataArray[sizeof(telemStruct_t)];
 } telemU;
 
 //Functions
@@ -108,6 +109,7 @@ void UpdatePID(pidPos *pid);
 void pidSetup();
 void initPIDVelProfile();
 void setPIDVelProfile(int pid_num, int *interval, int *delta, int *vel);
+void setSync(unsigned char new_sync);
 void initPIDObj(pidT *pid, int Kp, int Ki, int Kd, int Kaw, int ff);
 void initPIDObjPos(pidPos *pid, int Kp, int Ki, int Kd, int Kaw, int ff);
 //void SetupTimer1(void);

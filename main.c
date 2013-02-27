@@ -83,6 +83,7 @@ int main() {
     mpuSetup(1);
     tiHSetup();
 
+    
     pidSetup();
 
     LED_2 = 0;

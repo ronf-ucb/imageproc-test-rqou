@@ -66,6 +66,9 @@ int measLast1[NUM_PIDS];
 int measLast2[NUM_PIDS];
 int bemf[NUM_PIDS]; //used to store the true, unfiltered speed
 
+// State of synchronization LED
+static volatile unsigned char sync;
+
 // -------------------------------------------
 // called from main()
 void pidSetup() {
@@ -126,6 +129,15 @@ void setPIDVelProfile(int pid_num, int *interval, int *delta, int *vel)
 		pidVel[pid_num].delta[i]= delta[i];
 		pidVel[pid_num].vel[i]= vel[i];
 	}
+}
+
+void setSync(unsigned char new_sync) {
+    sync = new_sync;
+    if(sync) {
+        SetDCMCPWM(3, 10000, 0);
+    } else {
+        tiHSetDC(3,0);
+    }
 }
 
 // called from pidSetup()
@@ -237,7 +249,7 @@ volatile telemU telemPIDdata;
 // store current PID info into structure. Used by telemSaveSample and CmdGetPIDTelemetry
 void telemGetPID() {
     telemPIDdata.telemStruct.timeStamp = (long)sclockGetTime();
-
+    telemPIDdata.telemStruct.sync = sync;
     telemPIDdata.telemStruct.posL = pidObjs[0].p_state;
     telemPIDdata.telemStruct.posR = pidObjs[1].p_state;
     telemPIDdata.telemStruct.composL = pidObjs[0].p_input;

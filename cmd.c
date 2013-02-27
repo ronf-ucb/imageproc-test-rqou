@@ -197,6 +197,8 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
         idx+=2;
     }
     setPIDVelProfile(1, interval, delta, vel);
+    
+    setSync(frame[idx]);
 
     //Send confirmation packet
     // WARNING: Will fail at high data throughput

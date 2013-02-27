@@ -68,23 +68,28 @@ int bemf[NUM_PIDS]; //used to store the true, unfiltered speed
 
 // -------------------------------------------
 // called from main()
-void pidSetup()
-{
-	int i;
-	for(i = 0; i < NUM_PIDS; i++){
-		initPIDObjPos( &(pidObjs[i]), DEFAULT_KP, DEFAULT_KI, DEFAULT_KD, DEFAULT_KAW, DEFAULT_FF); 
-	}
-	initPIDVelProfile();
-	SetupTimer1();  // main interrupt used for leg motor PID
+void pidSetup() {
+    int i;
+    for(i = 0; i < NUM_PIDS; i++){
+        initPIDObjPos( &(pidObjs[i]), DEFAULT_KP, DEFAULT_KI, DEFAULT_KD, DEFAULT_KAW, DEFAULT_FF);
+    }
+    initPIDVelProfile();
 
-	lastMoveTime = 0;
-//  initialize PID structures before starting Timer1
-	pidSetInput(0,0);
-	pidSetInput(1,0);
-	
-	EnableIntT1; // turn on pid interrupts
+    unsigned int T1CON1value, T1PERvalue;
+    T1CON1value = T1_ON & T1_SOURCE_INT & T1_PS_1_8 & T1_GATE_OFF &
+              T1_SYNC_EXT_OFF & T1_INT_PRIOR_4;
+    T1PERvalue = 0x03E8; //clock period = 0.0002s = ((T1PERvalue * prescaler)/FCY) (5000Hz)
+    t1_ticks = 0;
+    OpenTimer1(T1CON1value, T1PERvalue);
 
-	//calibBatteryOffset(100); //???This is broken for 2.5
+    lastMoveTime = 0;
+    //  initialize PID structures before starting Timer1
+    pidSetInput(0,0);
+    pidSetInput(1,0);
+
+    EnableIntT1; // turn on pid interrupts
+
+    //calibBatteryOffset(100); //???This is broken for 2.5
 }
 
 
@@ -360,7 +365,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
 
         if (t1_ticks == T1_MAX) t1_ticks = 0;
         t1_ticks++;
-        pidGetState();	// always update state, even if motor is coasting
+        pidGetState(); // always update state, even if motor is coasting
         // only update tracking setpoint if time has not yet expired
         for (j = 0; j< NUM_PIDS; j++) {
             if (pidObjs[j].onoff) {

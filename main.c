@@ -56,7 +56,14 @@ int main() {
     SetupPorts();
     sclockSetup();
 
-    LED_3 = 1;
+    // LED_1 used as alive indicator
+    LED_1 = 1;
+    
+    // LED_2 is status, keep on for init
+    LED_2 = 1;
+    
+    // LED_3 indicates interrput
+    LED_3 = 0;
 
     // Message Passing
     fun_queue = carrayCreate(FUN_Q_LEN);
@@ -72,16 +79,14 @@ int main() {
     uart_tx_flag = 0;
     uartInit(&cmdPushFunc);
 
-    // Need delay for encoders to be ready
-    delay_ms(100);
     amsEncoderSetup();
     mpuSetup(1);
     tiHSetup();
 
     pidSetup();
 
-    LED_3 = 0;
-    LED_1 = 1;
+    LED_2 = 0;
+    
     while(1){
         // Send outgoing radio packets
         radioProcess();

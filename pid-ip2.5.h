@@ -83,12 +83,8 @@ typedef struct {
     long composR;
     int dcL;		// PWM duty cycle
     int dcR;
-    int gyroX;
-    int gyroY;
-    int gyroZ;
-    int accelX;
-    int accelY;
-    int accelZ;
+    int gyro[3];
+    int accel[3];
     int bemfL;
     int bemfR;
     int Vbatt; // battery voltage

@@ -57,14 +57,8 @@ static char calib_flag = 0;   // flag is set if doing calibration
 static long offsetAccumulatorL, offsetAccumulatorR;
 static unsigned int offsetAccumulatorCounter;
 
-static int gdata[3];	//gyrodata
-static int xldata[3];  // accelerometer data
-
 // State of synchronization LED
 static unsigned char sync;
-
-// structure to keep track of telemetry recording
-static telemU telemPIDdata;
 
 // UART streaming objects
 static volatile unsigned char interrupt_count = 0;
@@ -75,7 +69,7 @@ extern volatile unsigned char uart_tx_flag;
 static inline void pidUpdateState(int pid_num);
 static inline void pidUpdateSetpoint(int pid_num);
 static inline void pidUpdateControl(int pid_num);
-static inline void pidUpdateTelem(void);
+static inline void pidUpdateTelem(telemStruct_t *telemBuffer);
 
 // ----------   all the initializations  -------------------------
 // -------------------------------------------
@@ -282,8 +276,10 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
         if (t1_ticks++ == T1_MAX) {
             t1_ticks = 0;
         }
-
+        
+        LED_3 = 0;
         for (j = 0; j< NUM_PIDS; j++) {
+            LED_3 = 1;
             // only update tracking setpoint if time has not yet expired
             pidUpdateState(j); // always update state, even if motor is coasting
 
@@ -293,18 +289,18 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
             } else {
                 tiHSetDC(j+1,0);
             }
+            LED_3 = 0;
         }
-        
-        if(pidObjs[0].onoff && !uart_tx_flag) {
-            pidUpdateTelem();
 
+        LED_3 = 1;
+        if(pidObjs[0].onoff && !uart_tx_flag) {
             uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
             if(uart_tx_packet != NULL) {
                 //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
                 //bytes: 4,4,4,4,4,2,2,2,2,2,2,2,2,2,2
                 paySetType(uart_tx_packet->payload, CMD_PID_TELEMETRY);
                 paySetStatus(uart_tx_packet->payload, 0);
-                paySetData(uart_tx_packet->payload, sizeof(telemStruct_t), (unsigned char *) &telemPIDdata);
+                pidUpdateTelem((telemStruct_t*)payGetData(uart_tx_packet->payload));
                 uart_tx_flag = 1;
             }
         }
@@ -416,26 +412,21 @@ static inline void pidUpdateControl(int pid_num) {
 }
 
 // store current PID info into structure. Used by telemSaveSample and CmdGetPIDTelemetry
-static inline void pidUpdateTelem(void) {
-    telemPIDdata.telemStruct.timeStamp = (long)sclockGetTime();
-    telemPIDdata.telemStruct.sync = sync;
-    telemPIDdata.telemStruct.posL = pidObjs[0].p_state;
-    telemPIDdata.telemStruct.posR = pidObjs[1].p_state;
-    telemPIDdata.telemStruct.composL = pidObjs[0].p_input;
-    telemPIDdata.telemStruct.composR = pidObjs[1].p_input;
-    telemPIDdata.telemStruct.dcL = pidObjs[0].output;	// left
-    telemPIDdata.telemStruct.dcR = pidObjs[1].output;	// right
-    telemPIDdata.telemStruct.bemfL = 0;
-    telemPIDdata.telemStruct.bemfR = 0;
+static inline void pidUpdateTelem(telemStruct_t *telemBuffer) {
+    telemBuffer->timeStamp = (long)sclockGetTime();
+    telemBuffer->sync = sync;
 
-    mpuGetGyro(gdata);
-    mpuGetXl(xldata);
-
-    telemPIDdata.telemStruct.gyroX = gdata[0];
-    telemPIDdata.telemStruct.gyroY = gdata[1];
-    telemPIDdata.telemStruct.gyroZ = gdata[2];
-    telemPIDdata.telemStruct.accelX = xldata[0];
-    telemPIDdata.telemStruct.accelY = xldata[1];
-    telemPIDdata.telemStruct.accelZ = xldata[2];
-    telemPIDdata.telemStruct.Vbatt = (int) adcGetVbatt();
+    telemBuffer->posL = pidObjs[0].p_state;
+    telemBuffer->posR = pidObjs[1].p_state;
+    telemBuffer->composL = pidObjs[0].p_input;
+    telemBuffer->composR = pidObjs[1].p_input;
+    telemBuffer->dcL = pidObjs[0].output;	// left
+    telemBuffer->dcR = pidObjs[1].output;	// right
+    
+    mpuGetGyro(telemBuffer->gyro);
+    mpuGetXl(telemBuffer->accel);
+    
+    telemBuffer->bemfL = (int) adcGetMotorA();
+    telemBuffer->bemfR = (int) adcGetMotorB();
+    telemBuffer->Vbatt = (int) adcGetVbatt();
 }

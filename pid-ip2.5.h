@@ -29,54 +29,50 @@
 
 //Structures and enums
 //pid type for turning (steering)
-typedef struct
-{
-	int input;
+typedef struct {
+    int input;
     long dState, iState, preSat, p, i, d;
     int Kp, Ki, Kd, Kaw, y_old, output;
     unsigned char N;
-	char onoff; //boolean
-	long error;
-	unsigned long run_time;
-	unsigned long start_time;
-	int inputOffset;
-	int feedforward;
+    char onoff; //boolean
+    long error;
+    unsigned long run_time;
+    unsigned long start_time;
+    int inputOffset;
+    int feedforward;
 } pidT;
 
 // pid type for leg control
-typedef struct
-{
-	long p_input;	// reference position input - [16].[16]
-	long p_state;	// current position
-	long p_error;  // position error
-	int v_input; // reference velocity input
-	int v_state; // current velocity
-	int v_error; // velocity error
-	long i_error; // integral error
-	long  p, i, d;   // control contributions from position, integral, and derivative gains respectively
-  	long preSat; // output value before saturations
-	int  output;	 //  control output u
- 	char onoff; //boolean
-	unsigned long run_time;
-	unsigned long start_time;
-	int inputOffset;  // BEMF setpoint offset
-	int feedforward;
-      int Kp, Ki, Kd;
-	int Kaw;  // anti-windup gain
+typedef struct {
+    long p_input;	// reference position input - [16].[16]
+    long p_state;	// current position
+    long p_error;  // position error
+    int v_input; // reference velocity input
+    int v_state; // current velocity
+    int v_error; // velocity error
+    long i_error; // integral error
+    long  p, i, d;   // control contributions from position, integral, and derivative gains respectively
+    long preSat; // output value before saturations
+    int  output;	 //  control output u
+    char onoff; //boolean
+    unsigned long run_time;
+    unsigned long start_time;
+    int inputOffset;  // BEMF setpoint offset
+    int feedforward;
+    int Kp, Ki, Kd;
+    int Kaw;  // anti-windup gain
 } pidPos;
 
 // structure for velocity control of leg cycle
-typedef struct
-{ 
-	int interpolate;  				// intermediate value between setpoints
-	unsigned long expire;		// end of current segment
-	int index;					// right index to moves
-	int interval[NUM_VELS];	// number of ticks between intervals
-	int delta[NUM_VELS];   // increments for right setpoint
-	int vel[NUM_VELS];     // velocity increments to setpoint, >>8
-	int leg_stride;
+typedef struct {
+    int interpolate;  				// intermediate value between setpoints
+    unsigned long expire;		// end of current segment
+    int index;					// right index to moves
+    int interval[NUM_VELS];	// number of ticks between intervals
+    int delta[NUM_VELS];   // increments for right setpoint
+    int vel[NUM_VELS];     // velocity increments to setpoint, >>8
+    int leg_stride;
 } pidVelLUT;
-
 
 //============================Telemetry====================================
 typedef struct {
@@ -104,25 +100,21 @@ typedef union packedTelemUnion {
     unsigned char dataArray[sizeof(telemStruct_t)];
 } telemU;
 
-//Functions
-void UpdatePID(pidPos *pid);
-void pidSetup();
-void initPIDVelProfile();
-void setPIDVelProfile(int pid_num, int *interval, int *delta, int *vel);
-void setSync(unsigned char new_sync);
-void initPIDObj(pidT *pid, int Kp, int Ki, int Kd, int Kaw, int ff);
-void initPIDObjPos(pidPos *pid, int Kp, int Ki, int Kd, int Kaw, int ff);
-//void SetupTimer1(void);
-void pidSetInput(int pid_num, int input_val);
-void pidSetInputSameRuntime(int pid_num, int input_val);
-void pidSetGains(int pid_num, int Kp, int Ki, int Kd, int Kaw, int ff);
-void pidGetState(); // update state vector from bemf and Hall angle
-void pidGetSetpoint(int j);
-void pidSetControl();
-void EmergencyStop(void);
-unsigned char* pidGetTelemetry(void);
+// Init Functions
+void pidSetup(void);
+void pidInitPos(int pid_num, int Kp, int Ki, int Kd, int Kaw, int ff);
+void pidInitVelProfile(int pid_num);
+void pidCalibBatteryOffset(int spindown_ms);
+
+// Set functions
 void pidOn(int pid_num);
 void pidZeroPos(int pid_num);
-void calibBatteryOffset(int spindown_ms);
+void pidSetGains(int pid_num, int Kp, int Ki, int Kd, int Kaw, int ff);
+void pidSetInput(int pid_num, int input_val);
+void pidSetVelProfile(int pid_num, int *interval, int *delta, int *vel);
+void pidSetSync(unsigned char new_sync);
+
+// Halt pid control
+void pidEmergencyStop(void);
 
 #endif // __PID_H

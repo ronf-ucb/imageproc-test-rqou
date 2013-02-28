@@ -23,6 +23,7 @@
 #include "radio.h"
 #include "tih.h"
 #include "ams-enc.h"
+#include "adc_pid.h"
 #include "radio_settings.h"
 #include "tests.h" // TODO (fgb) : define/includes need to live elsewhere
 #include "dfmem.h"
@@ -82,7 +83,7 @@ int main() {
     amsEncoderSetup();
     mpuSetup(1);
     tiHSetup();
-
+    adcSetup();
     
     pidSetup();
 

@@ -45,12 +45,10 @@
         <itemPath>../imageproc-lib/battery.c</itemPath>
         <itemPath>../imageproc-lib/battery.h</itemPath>
       </logicalFolder>
-      <itemPath>init.c</itemPath>
       <itemPath>interrupts.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>tests.c</itemPath>
       <itemPath>consts.h</itemPath>
-      <itemPath>init.h</itemPath>
       <itemPath>interrupts.h</itemPath>
       <itemPath>radio_settings.h</itemPath>
       <itemPath>tests.h</itemPath>

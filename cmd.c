@@ -108,9 +108,6 @@ unsigned char cmdGetAMSPos(unsigned char type, unsigned char status,
     motor_count[0] = pidObjs[0].p_state;
     motor_count[1] = pidObjs[1].p_state;
 
-    // motor_count[0] = encPos[0].pos;
-    // motor_count[1] = encPos[1].pos;
-
     radioSendData(RADIO_DEST_ADDR, status, CMD_GET_AMS_POS,
             sizeof(motor_count), (unsigned char *)motor_count, 0);
     return 1;
@@ -179,7 +176,7 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
         idx+=2;
     }
 
-    setPIDVelProfile(0, interval, delta, vel);
+    pidSetVelProfile(0, interval, delta, vel);
 
     for(i = 0; i < NUM_VELS; i ++) {
         vel[i] = frame[idx]+ (frame[idx+1]<<8);
@@ -196,9 +193,9 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
 
         idx+=2;
     }
-    setPIDVelProfile(1, interval, delta, vel);
+    pidSetVelProfile(1, interval, delta, vel);
     
-    setSync(frame[idx]);
+    pidSetSync(frame[idx]);
 
     //Send confirmation packet
     // WARNING: Will fail at high data throughput
@@ -233,7 +230,7 @@ unsigned char cmdZeroPos(unsigned char type, unsigned char status, unsigned char
 
 void cmdError() {
     int i;
-    EmergencyStop();
+    pidEmergencyStop();
     for(i= 0; i < 10; i++) {
         LED_1 ^= 1;
         delay_ms(200);

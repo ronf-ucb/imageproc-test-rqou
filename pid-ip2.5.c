@@ -413,6 +413,8 @@ static inline void pidUpdateControl(int pid_num) {
 
 // store current PID info into structure. Used by telemSaveSample and CmdGetPIDTelemetry
 static inline void pidUpdateTelem(telemStruct_t *telemBuffer) {
+    int tempIMU;
+
     telemBuffer->timeStamp = (long)sclockGetTime();
     telemBuffer->sync = sync;
 
@@ -425,7 +427,19 @@ static inline void pidUpdateTelem(telemStruct_t *telemBuffer) {
     
     mpuGetGyro(telemBuffer->gyro);
     mpuGetXl(telemBuffer->accel);
-    
+
+    // Correct gyro alignment and read order (Z,X,-Y due to endianess flip) so
+    // that the telemetry is read as X,Y,Z in robot frame
+    tempIMU = telemBuffer->gyro[0];
+    telemBuffer->gyro[0] = telemBuffer->gyro[1];
+    telemBuffer->gyro[1] = -telemBuffer->gyro[2];
+    telemBuffer->gyro[2] = tempIMU;
+
+    tempIMU = telemBuffer->accel[0];
+    telemBuffer->accel[0] = telemBuffer->accel[1];
+    telemBuffer->accel[1] = -telemBuffer->accel[2];
+    telemBuffer->accel[2] = tempIMU;
+
     telemBuffer->bemfL = (int) adcGetMotorA();
     telemBuffer->bemfR = (int) adcGetMotorB();
     telemBuffer->Vbatt = (int) adcGetVbatt();

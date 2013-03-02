@@ -420,6 +420,8 @@ static inline void pidUpdateTelem(telemStruct_t *telemBuffer) {
 
     telemBuffer->posL = pidObjs[0].p_state;
     telemBuffer->posR = pidObjs[1].p_state;
+    //telemBuffer->posL = encPos[0].pos;
+    //telemBuffer->posR = encPos[1].pos;
     telemBuffer->composL = pidObjs[0].p_input;
     telemBuffer->composR = pidObjs[1].p_input;
     telemBuffer->dcL = pidObjs[0].output;	// left

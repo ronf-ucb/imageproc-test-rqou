@@ -80,12 +80,12 @@ int main() {
     uart_tx_flag = 0;
     uartInit(&cmdPushFunc);
 
-    amsEncoderSetup();
+    //amsEncoderSetup();
     mpuSetup(1);
     tiHSetup();
     adcSetup();
     
-    pidSetup();
+    //pidSetup();
 
     LED_2 = 0;
     

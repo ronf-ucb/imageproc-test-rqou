@@ -119,17 +119,17 @@ unsigned char cmdGetAMSPos(unsigned char type, unsigned char status,
 unsigned char cmdSetThrustOpenLoop(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
     int thrust1 = frame[0] + (frame[1] << 8);
     int thrust2 = frame[2] + (frame[3] << 8);
-    unsigned int run_time_ms = frame[4] + (frame[5] << 8);
+    //unsigned int run_time_ms = frame[4] + (frame[5] << 8);
 
-    DisableIntT1;	// since PID interrupt overwrites PWM values
+    //DisableIntT1;	// since PID interrupt overwrites PWM values
 
     tiHSetDC(1, thrust1);
     tiHSetDC(2, thrust2);
-    delay_ms(run_time_ms);
-    tiHSetDC(1,0);
-    tiHSetDC(2,0);
+    //delay_ms(run_time_ms);
+    //tiHSetDC(1,0);
+    //tiHSetDC(2,0);
 
-    EnableIntT1;
+    //EnableIntT1;
     return 1;
  } 
 

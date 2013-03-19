@@ -38,16 +38,16 @@
 #  Fernando L. Garcia Bermudez      2012-8-20    Initial release
 #
 
-import msvcrt, sys, traceback
+import sys, traceback
 import test_suite
 
 
 #RADIO_DEV_NAME  = '/dev/tty.usbserial-*' or 'COMx'
 #RADIO_DEV_NAME = 'COM1'
-RADIO_DEV_NAME = 'COM9'
-BS_BAUDRATE = 230400
+RADIO_DEV_NAME = '/dev/ttyUSB0'
+BS_BAUDRATE = 115200
 
-DEST_ADDR = '\x21\x02'
+DEST_ADDR = '\x21\x12'
 
 motorgains = [1800,0,400,0,0,\
               1800,0,400,0,0] #TUNE THESE
@@ -59,6 +59,11 @@ if __name__ == '__main__':
         ts = test_suite.TestSuite(RADIO_DEV_NAME,            \
                                   baud_rate=BS_BAUDRATE, \
                                   dest_addr=DEST_ADDR  )
+
+
+
+        while True:
+            ts.test_radio()
 
         #Initialization
         ts.SetGains(motorgains)

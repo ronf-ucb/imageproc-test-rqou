@@ -46,6 +46,9 @@ unsigned char test_sma(unsigned char type, unsigned char status, \
 unsigned char test_mpu(unsigned char type, unsigned char status, \
                           unsigned char length, unsigned char* data);
 
+unsigned char test_mpu_uart(unsigned char type, unsigned char status, \
+                          unsigned char length, unsigned char* data);
+
 unsigned char set_motor_direction(unsigned char chan_num, unsigned char\
                             direction);
 

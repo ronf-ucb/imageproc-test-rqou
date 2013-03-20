@@ -62,6 +62,7 @@ void cmdSetup(void) {
     cmd_func[CMD_TEST_RADIO] = &test_radio;
     cmd_func[CMD_TEST_MPU] = &test_mpu;
     cmd_func[CMD_ENCAPSULATED_RADIO] = &cmdEncapRadio;
+    cmd_func[CMD_TEST_MPU_UART] = &test_mpu_uart;
     cmd_func[CMD_SET_THRUST_OPENLOOP] = &cmdSetThrustOpenLoop;
     cmd_func[CMD_SET_PID_GAINS] = &cmdSetPIDGains;
     cmd_func[CMD_PID_START_MOTORS] = &cmdPIDStartMotors;

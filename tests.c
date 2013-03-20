@@ -474,6 +474,39 @@ unsigned char test_mpu(unsigned char type, unsigned char status, \
     return 1;
 }
 
+extern volatile MacPacket uart_tx_packet;
+extern volatile unsigned char uart_tx_flag;
+#include "ppool.h"
+unsigned char test_mpu_uart(unsigned char type, unsigned char status, \
+                          unsigned char length, unsigned char* data)
+{
+    MacPacket packet;
+    Payload pld;
+
+    mpuBeginUpdate();
+
+    int buf[7];
+
+    mpuGetGyro(&(buf[0]));
+    mpuGetXl(&(buf[3]));
+    mpuGetTemp(&(buf[6]));
+
+    packet = ppoolRequestFullPacket(14);
+    if(packet == NULL) return 0;
+
+    // Prepare the payload
+    pld = packet->payload;
+    paySetStatus(pld, STATUS_UNUSED);
+    paySetType(pld, type);
+    paySetData(pld, 14, (unsigned char *)buf);
+
+    // Enqueue the packet for broadcast
+    uart_tx_packet = packet;
+    uart_tx_flag = 1;
+
+    return 1;
+}
+
 /*
  * This version is for controlling the Freescale motor controller. The aim is
  * to phase the controller out for the Toshiba TB6612FNG.

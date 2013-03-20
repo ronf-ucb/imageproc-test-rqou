@@ -38,6 +38,8 @@ static unsigned char cmdNop(unsigned char type, unsigned char status, unsigned c
 static unsigned char cmdWhoAmI(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static unsigned char cmdGetAMSPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 
+static unsigned char cmdEncapRadio(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
+
 //Motor and PID functions
 static unsigned char cmdSetThrustOpenLoop(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
 static unsigned char cmdSetPIDGains(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame);
@@ -59,6 +61,7 @@ void cmdSetup(void) {
     }
     cmd_func[CMD_TEST_RADIO] = &test_radio;
     cmd_func[CMD_TEST_MPU] = &test_mpu;
+    cmd_func[CMD_ENCAPSULATED_RADIO] = &cmdEncapRadio;
     cmd_func[CMD_SET_THRUST_OPENLOOP] = &cmdSetThrustOpenLoop;
     cmd_func[CMD_SET_PID_GAINS] = &cmdSetPIDGains;
     cmd_func[CMD_PID_START_MOTORS] = &cmdPIDStartMotors;
@@ -110,6 +113,15 @@ unsigned char cmdGetAMSPos(unsigned char type, unsigned char status,
 
     radioSendData(RADIO_DEST_ADDR, status, CMD_GET_AMS_POS,
             sizeof(motor_count), (unsigned char *)motor_count, 0);
+    return 1;
+}
+
+unsigned char cmdEncapRadio(unsigned char type, unsigned char status,
+        unsigned char length, unsigned char *frame) {
+
+    radioSendData(RADIO_DEST_ADDR, frame[0], frame[1],
+            length - 2, &(frame[2]), 0);
+
     return 1;
 }
 

@@ -105,6 +105,16 @@ int main() {
             // Check for unprocessed packet
             rx_packet = radioDequeueRxPacket();
             if(rx_packet != NULL) {
+                // Send via UART
+                MacPacket newPacket = ppoolRequestFullPacket(rx_packet->payload_length);
+                if(newPacket != NULL) {
+                    paySetType(newPacket->payload, CMD_ENCAPSULATED_RADIO);
+                    paySetStatus(newPacket->payload, 0);
+                    // Data format will be LEN, CHK_LEN, 0x00, 0x71, STAT, TYPE, PAYLOAD, CSUM
+                    paySetData(newPacket->payload, rx_packet->payload_length, rx_packet->payload->pld_data);
+                    uartSendPacket(newPacket);
+                }
+
                 cmdPushFunc(rx_packet);
             }
         }

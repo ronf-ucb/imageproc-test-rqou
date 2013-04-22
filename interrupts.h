@@ -14,7 +14,7 @@ void __attribute__((interrupt, no_auto_psv)) _T6Interrupt(void);
 
 void setupTimer6(unsigned int fs);
 
-extern volatile unsigned int t1_ticks;
+extern volatile unsigned long t1_ticks;
 extern unsigned char t1_cycles;
 extern volatile unsigned int pwm_period_ticks;
 extern volatile unsigned int pwm_periods_per_cycle;

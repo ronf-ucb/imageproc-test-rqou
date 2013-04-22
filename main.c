@@ -128,7 +128,10 @@ int main() {
                    rx_function = (test_function)(rx_payload->test);
                    if(rx_function != NULL) {
                        LED_2 = ~LED_2;
-                       (rx_function)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload));
+                       (rx_function)(payGetType(rx_payload), 
+						payGetStatus(rx_payload), 
+						payGetDataLength(rx_payload),
+						 payGetData(rx_payload));
                    }
                }
                ppoolReturnFullPacket(rx_packet);

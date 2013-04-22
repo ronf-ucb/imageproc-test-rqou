@@ -4,7 +4,7 @@
 #include "uart.h"
 #include "pwm.h"
 #include "ports.h"
-extern unsigned long t1_ticks;
+extern volatile unsigned long t1_ticks;
 
 
 void SetupADC(void)

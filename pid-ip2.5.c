@@ -49,7 +49,7 @@ static pidVelLUT  pidVel[NUM_PIDS];
 
 #define T1_MAX 0xffffff  // max before rollover of 1 ms counter
 // may be glitch in longer missions at rollover
-static volatile unsigned long t1_ticks;
+ volatile unsigned long t1_ticks;
 
 // Telemetry objects
 //for battery voltage:
@@ -296,7 +296,8 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
         if(pidObjs[0].onoff && !uart_tx_flag) {
             uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
             if(uart_tx_packet != NULL) {
-                //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
+                //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|
+		// DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
                 //bytes: 4,4,4,4,4,2,2,2,2,2,2,2,2,2,2
                 paySetType(uart_tx_packet->payload, CMD_PID_TELEMETRY);
                 paySetStatus(uart_tx_packet->payload, 0);
